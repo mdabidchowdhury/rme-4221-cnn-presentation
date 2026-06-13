@@ -39,6 +39,7 @@ export default function T11_ConvNeXtView() {
           defaultS={1} 
           defaultP={3} 
           defaultCout={128} 
+          revisionText="Here, channels stay at 128 during a massive 7x7 scan. By keeping the channels flat during the depthwise phase, ConvNeXt can afford the large 7x7 kernel required to mimic the 'global receptive field' of a Vision Transformer."
         />
         <p className="text-sm text-gray-500 italic mt-2">
           * Notice the unusually large 7x7 kernel (K=7). In traditional CNNs, this was considered too computationally expensive. But when paired with Depthwise Convolution, the 7x7 kernel becomes highly efficient and allows the CNN to mimic the large "global receptive field" of a Transformer!

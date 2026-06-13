@@ -38,6 +38,7 @@ export default function T12_SENetView() {
           defaultS={1} 
           defaultP={0} 
           defaultCout={256} 
+          revisionText="Here, the spatial dimensions COLLAPSE but channels remain (256). By using a Kernel exactly the size of the image (56x56), the network creates a flat 1D vector to mathematically judge which of the 256 channels are actually important."
         />
         <p className="text-sm text-gray-500 italic mt-2">
           * Notice that the Kernel size (K=56) is exactly equal to the Input Width (W<sub>in</sub>=56). This effectively "squashes" the entire spatial grid down into a W<sub>out</sub>=1, H<sub>out</sub>=1 tensor, leaving only the C=256 channels! This vector is then evaluated to decide which of the 256 channels are actually important.

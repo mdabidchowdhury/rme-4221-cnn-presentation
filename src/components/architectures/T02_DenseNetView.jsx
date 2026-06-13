@@ -34,6 +34,7 @@ export default function T02_DenseNetView() {
           defaultS={1} 
           defaultP={1} 
           defaultCout={32} 
+          revisionText="Here, the channels ACCUMULATE. Instead of exploding, the network generates 32 new feature maps (the growth rate, k=32). Crucially, DenseNet concatenates these 32 new channels with the original 64, passing a total of 96 channels to the next layer!"
         />
         <p className="text-sm text-gray-500 italic mt-2">
           * Notice how the output channels (C<sub>out</sub> = 32) represent the new knowledge generated. This will be concatenated with the C<sub>in</sub> = 64 to pass 96 channels to the next layer!

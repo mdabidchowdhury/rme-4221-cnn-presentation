@@ -36,6 +36,7 @@ export default function T08_XceptionView() {
           defaultS={2} 
           defaultP={1} 
           defaultCout={256} 
+          revisionText="Here, channels remain STRICTLY ISOLATED (256 to 256). Because Xception completely decouples spatial math from cross-channel math, this layer only looks at spatial dimensions. Zero cross-channel mixing happens here."
         />
         <p className="text-sm text-gray-500 italic mt-2">
           * Notice how the spatial dimensions (W<sub>in</sub>, H<sub>in</sub>) are downsampled by a stride of 2, but the channel count (C<sub>in</sub> to C<sub>out</sub>) remains exactly the same. The channels are mapped purely spatially here, with zero cross-channel mixing!

@@ -39,6 +39,7 @@ export default function T03_MobileNetView() {
           defaultS={1} 
           defaultP={1} 
           defaultCout={32} 
+          revisionText="Here, the channels STAY THE SAME (32 to 32). In a depthwise convolution, the network applies exactly ONE filter per channel, refusing to mix them yet. This spatial-only math saves tremendous computing power on mobile processors."
         />
         <p className="text-sm text-gray-500 italic mt-2">
           * Notice that in the Depthwise stage, C<sub>out</sub> equals C<sub>in</sub> (32). Standard convolutions would immediately expand this to the final channel count, but MobileNet delays that until the subsequent 1x1 Pointwise layer to save compute!

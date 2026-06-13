@@ -36,6 +36,7 @@ export default function T07_ShuffleNetView() {
           defaultS={1} 
           defaultP={0} 
           defaultCout={48} 
+          revisionText="Here, channels are SHUFFLED, not computed. To allow separated groups of channels to 'talk' to each other without adding mathematical multiplication (FLOPS), ShuffleNet simply rearranges the memory addresses of the 48 channels."
         />
         <p className="text-sm text-gray-500 italic mt-2">
           * Notice we are using a 1x1 Kernel here. In ShuffleNet, this C<sub>out</sub> = 48 tensor will have its memory addresses transposed and flattened (shuffled) before moving to the next layer. This channel reorganization requires zero FLOPS!

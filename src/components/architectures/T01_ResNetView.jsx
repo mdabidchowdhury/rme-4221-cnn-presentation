@@ -33,6 +33,7 @@ export default function ResNetView() {
           defaultS={2} 
           defaultP={3} 
           defaultCout={64} 
+          revisionText="Here, the channels EXPLODE from 3 (RGB) to 64. The network applies 64 unique 7x7 filters to the raw image to find 64 different low-level patterns (like edges, shadows, and colors) to use later in the network."
         />
       </section>
 

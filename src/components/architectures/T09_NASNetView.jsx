@@ -39,6 +39,7 @@ export default function T09_NASNetView() {
           defaultS={2} 
           defaultP={2} 
           defaultCout={256} 
+          revisionText="Here, the channels jump from 128 to 256 by ALGORITHMIC CHOICE. A reinforcement learning controller determined that doubling the channels while halving the spatial resolution (S=2) yielded the highest accuracy on CIFAR-10."
         />
         <p className="text-sm text-gray-500 italic mt-2">
           * Notice the stride (S=2). This specific block represents the Reduction Cell stepping down the spatial resolution (W<sub>out</sub> = 16) while expanding the feature space (C<sub>out</sub> = 256), a topology specifically chosen by the Reinforcement Learning controller to maximize accuracy!

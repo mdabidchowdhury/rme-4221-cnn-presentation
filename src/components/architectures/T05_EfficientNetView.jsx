@@ -40,6 +40,7 @@ export default function T05_EfficientNetView() {
           defaultS={2} 
           defaultP={1} 
           defaultCout={32} 
+          revisionText="Here, channels are scaled SYSTEMATICALLY. Instead of an arbitrary guess, EfficientNet uses a compound coefficient formula to increase the channel width alongside depth and resolution, ensuring optimal parameter usage."
         />
         <p className="text-sm text-gray-500 italic mt-2">
           * Notice the input width/height (W<sub>in</sub> = 224). If we scaled this model up to EfficientNet-B7 using the compound formula, W<sub>in</sub> would jump to 600, significantly increasing the size of the intermediate feature maps to capture finer visual details!

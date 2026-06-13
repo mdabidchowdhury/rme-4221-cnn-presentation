@@ -39,6 +39,7 @@ export default function T04_SqueezeNetView() {
           defaultS={1} 
           defaultP={0} 
           defaultCout={16} 
+          revisionText="Here, the channels are SQUEEZED from 128 down to 16. Using a cheap 1x1 filter, the network intentionally creates a bottleneck to save massive amounts of memory and FLOPS before doing the heavy 3x3 expand phase."
         />
         <p className="text-sm text-gray-500 italic mt-2">
           * Notice how the 1x1 convolution acts as a channel-reduction tool. We take C<sub>in</sub> = 128 channels and "squeeze" them down to C<sub>out</sub> = 16 channels, maintaining the 55x55 spatial resolution. This 16-channel tensor is extremely cheap to process in the subsequent Expand phase!

@@ -37,6 +37,7 @@ export default function T10_MobileNetV2View() {
           defaultS={1} 
           defaultP={0} 
           defaultCout={144} 
+          revisionText="Here, channels TEMPORARILY EXPLODE from 24 to 144. It expands by 6x into a high-dimensional space just so the ReLU activation function doesn't permanently destroy data, before squashing it back down linearly."
         />
         <p className="text-sm text-gray-500 italic mt-2">
           * Notice how a tiny input of C<sub>in</sub> = 24 is instantly expanded to C<sub>out</sub> = 144. This temporary high-dimensional space allows the subsequent depthwise convolutions to apply ReLU safely without risking total information loss!

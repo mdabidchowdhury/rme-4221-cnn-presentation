@@ -35,6 +35,7 @@ export default function T06_ResNeXtView() {
           defaultS={1} 
           defaultP={1} 
           defaultCout={8} 
+          revisionText="Here, the channels are SPLIT. Instead of processing a massive 256-channel tensor all at once, ResNeXt splits it into 32 parallel paths of 8 channels each (Cardinality). It processes them independently, then merges them back together."
         />
         <p className="text-sm text-gray-500 italic mt-2">
           * Notice the input channels. If the total block input was 256 channels, a Cardinality of 32 means each parallel path only processes C<sub>in</sub> = 8 channels! The 32 separate outputs (each C<sub>out</sub> = 8) are then concatenated back together to reform the 256-channel tensor.
