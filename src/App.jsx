@@ -35,8 +35,8 @@ export default function App() {
       <header className="bg-blue-900 text-white p-6 shadow-md">
         <div className="max-w-6xl mx-auto">
           <h1 className="text-3xl font-bold">RME 4221: Machine Learning</h1>
-          <h2 className="text-xl mt-2 text-blue-200">Group Presentation Assessment</h2>
-          <p className="mt-1 text-sm">Presenters: Md. Abid Chowdhury, Samudra Jit Saha, Sayma Islam</p>
+          <h2 className="text-xl mt-2 text-blue-200">Presentation Assessment</h2>
+          <p className="mt-1 text-sm">Md. Abid Chowdhury</p>
         </div>
       </header>
 
