@@ -38,10 +38,10 @@ export default function InteractiveBlock({ title, defaultW, defaultK, defaultS, 
 
         {/* Operation Block */}
         <div className="flex flex-col items-center justify-center text-blue-600">
-          <div className="font-mono text-sm bg-blue-100 p-3 rounded-full mb-2 shadow-inner">
+          <div className="font-mono text-sm bg-blue-100 p-3 rounded-full mb-2 shadow-inner border border-blue-200">
             K:{k} | S:{s} | P:{p}
           </div>
-          <div className="text-2xl animate-bounce">↓</div>
+          <div className="text-2xl animate-bounce my-1">↓</div>
           <div className="text-sm font-semibold">Convolutional Filter</div>
         </div>
 
@@ -58,6 +58,34 @@ export default function InteractiveBlock({ title, defaultW, defaultK, defaultS, 
           </div>
         </div>
       </div>
+
+      {/* --- EXAM REVISION SECTION --- */}
+      <div className="mt-6 bg-white p-5 rounded shadow-sm border border-gray-200 text-sm text-gray-700">
+        <h5 className="font-bold text-gray-900 mb-2 border-b pb-1 flex items-center">
+          <span className="text-yellow-500 mr-2">💡</span> Exam Revision: How does this math work?
+        </h5>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-3">
+          <div>
+            <p className="mb-2"><strong>The Dimensionality Formula:</strong></p>
+            <code className="block bg-gray-50 border p-2 rounded text-center text-blue-800 font-mono mb-3">
+              Dim<sub>out</sub> = floor((Dim<sub>in</sub> - K + 2P) / S) + 1
+            </code>
+            <ul className="list-disc pl-5 space-y-1">
+              <li><strong>K (Kernel):</strong> The grid size scanning the input for visual features.</li>
+              <li><strong>S (Stride):</strong> The step size. A stride of 2 skips every other pixel, downsampling the image size by half.</li>
+              <li><strong>P (Padding):</strong> Fake zero-value pixels added to the borders so the kernel can scan the absolute edges without losing data.</li>
+            </ul>
+          </div>
+          <div>
+            <p className="mb-2"><strong>Why do Channels (C) explode?</strong></p>
+            <p className="leading-relaxed">
+              While spatial dimensions (W, H) shrink, the channels often jump significantly (e.g., from 3 RGB channels to 64). The network doesn't apply just one kernel; it applies <strong>C<sub>out</sub> unique kernels</strong>. If C<sub>out</sub> is 64, the network is searching for 64 completely different patterns (like horizontal lines, textures, or gradients). The output is no longer a picture—it is a stack of 64 "feature maps" highlighting exactly where those patterns live.
+            </p>
+          </div>
+        </div>
+      </div>
+      {/* ----------------------------- */}
+      
     </div>
   );
 }
