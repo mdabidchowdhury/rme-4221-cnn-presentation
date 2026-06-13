@@ -53,8 +53,13 @@ export default function T10_MobileNetV2View() {
           <li><strong>Performance Leap:</strong> Achieved 72.0% top-1 accuracy on ImageNet using only 3.4M parameters, significantly outperforming MobileNet V1 and SqueezeNet.</li>
           <li><strong>Object Detection:</strong> When paired with the SSD (Single Shot Detector) framework (forming SSDLite), it became the absolute gold standard for real-time object detection on smartphones.</li>
           <li><strong>Architectural Standard:</strong> The Inverted Residual Block became one of the most widely used building blocks in modern CNN design, directly utilized by EfficientNet.</li>
+          <li><strong>Efficiency:</strong> MobileNet V2 is extremely lightweight, making it ideal for mobile and embedded devices where computational resources are limited.</li>
+          <li><strong>Numerical Example:</strong> The expansion phase takes a small 24-channel input and multiplies it by an expansion ratio of 6, creating 144 temporary channels just to safely apply ReLU without destroying data.</li>
+          <li><strong>Transfer Learning:</strong> Its compact size and high accuracy make it a popular choice for transfer learning tasks, allowing developers to fine-tune the model for specific applications with limited data.</li>
+          <li><strong>Real-Time Applications:</strong> Object detection on self-driving car edge-computers. When paired with the SSDLite framework, it detects pedestrians and vehicles with near-zero latency.</li>
         </ul>
       </section>
+         
 
       <hr className="border-gray-300" />
 

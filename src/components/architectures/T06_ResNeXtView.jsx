@@ -51,6 +51,8 @@ export default function T06_ResNeXtView() {
           <li><strong>Superior Scaling:</strong> The authors mathematically proved and empirically demonstrated that increasing Cardinality is a more effective way of gaining accuracy than going deeper or wider.</li>
           <li><strong>Performance Benchmark:</strong> ResNeXt-101 achieved higher accuracy than ResNet-200 on ImageNet while maintaining the exact same computational complexity (FLOPS) as ResNet-101.</li>
           <li><strong>Standardization:</strong> Grouped convolutions became a standard tool in the deep learning arsenal, directly paving the way for architectures like ShuffleNet and ConvNeXt.</li>
+          <li><strong>Numerical Example:</strong> Using a Cardinality of 32 (splitting 256 channels into 32 paths of 8) matches the exact computational complexity of ResNet-101 but reduces the top-1 error by roughly 1-2%.</li>
+          <li><strong>Real-World Applications:</strong> Large-scale video classification and action recognition. The parallel transformation paths are highly efficient at capturing diverse temporal features in moving footage.</li>
         </ul>
       </section>
 

@@ -55,6 +55,8 @@ export default function T04_SqueezeNetView() {
           <li><strong>Parameter Reduction:</strong> SqueezeNet achieved AlexNet-level accuracy on ImageNet with 50x fewer parameters (1.2 million vs. 60 million).</li>
           <li><strong>Deep Compression:</strong> When combined with network pruning and quantization techniques, SqueezeNet's size was compressed to under 0.5 Megabytes—small enough to fit entirely within the L1/L2 cache of a modern CPU.</li>
           <li><strong>Hardware Influence:</strong> It proved that architectural design (Fire modules) could be as effective as pure mathematical compression, heavily influencing the design of inference engines for embedded robotics.</li>
+          <li><strong>Numerical Example:</strong> It achieves AlexNet-level accuracy (~80.3% top-5) using 50x fewer parameters. When compressed, the entire model size shrinks to just 0.5 Megabytes.</li>
+          <li><strong>Real-World Applications:</strong> Deploying AI onto highly constrained FPGA chips, microcontrollers, or autonomous drones that have extremely limited onboard SRAM.</li>
         </ul>
       </section>
 

@@ -55,6 +55,8 @@ export default function T03_MobileNetView() {
           <li><strong>Efficiency Benchmark:</strong> Compared to VGG-16, MobileNet achieved comparable accuracy on ImageNet but was 32 times smaller in size and 27 times less computationally intensive.</li>
           <li><strong>Hyperparameter Control:</strong> Introduced two global hyperparameters—Width Multiplier ($\alpha$) and Resolution Multiplier ($\rho$)—allowing developers to actively trade off accuracy for latency based on their specific hardware limits.</li>
           <li><strong>Edge AI Standardization:</strong> MobileNet established the blueprint for embedded machine learning, enabling real-time object detection and facial recognition on low-power architectures.</li>
+          <li><strong>Numerical Example:</strong> By splitting the math, a standard 3x3 depthwise separable convolution reduces the computational cost (FLOPS) by roughly 8 to 9 times compared to a standard 3x3 convolution.</li>
+          <li><strong>Practical Applications:</strong> Real-time face unlocking and Augmented Reality (AR) filters on mobile phones, where high frame rates and low battery drain are critical.</li>
         </ul>
       </section>
 

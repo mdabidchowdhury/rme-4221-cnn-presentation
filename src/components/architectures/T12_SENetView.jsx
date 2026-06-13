@@ -54,6 +54,10 @@ export default function T12_SENetView() {
           <li><strong>Winning ILSVRC:</strong> SENet conclusively won the 2017 ImageNet classification challenge, achieving a staggering top-5 error of just 2.251%.</li>
           <li><strong>Universal Applicability:</strong> The authors showed that dropping SE blocks into existing networks (creating SE-ResNet or SE-Inception) universally improved their accuracy across the board.</li>
           <li><strong>Minimal Overhead:</strong> The SE block adds phenomenal predictive power while only increasing the total parameter count by about 10%, adding virtually zero spatial convolution compute time.</li>
+          <li><strong>Framework Integration:</strong> Due to its simplicity and effectiveness, SE blocks have been widely adopted in modern deep learning frameworks and are often included as a standard option in many architectures.</li>
+          <li><strong>Outperforming Inception:</strong> Adding SE blocks to a standard ResNet-50 increases the parameter count by only ~10%, but reduces the absolute Top-5 error by nearly 1% across the board.</li>
+          <li><strong>Numerical Example:</strong> Adding SE blocks to a standard ResNet-50 increases the parameter count by only ~10%, but reduces the absolute Top-5 error by nearly 1% across the board.</li>
+          <li><strong>Real-World Applications:</strong> Fine-grained image classification (like identifying specific bird species or plant diseases). The network uses the SE block to heavily weigh specific "texture" channels over useless background channels.</li>
         </ul>
       </section>
 

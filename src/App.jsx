@@ -29,36 +29,65 @@ const architectures = [
 
 export default function App() {
   const [activeTab, setActiveTab] = useState(architectures[0].id);
+  const [showExplorer, setShowExplorer] = useState(false);
 
   return (
-    <div className="min-h-screen bg-gray-50 text-gray-900 font-sans">
-      <header className="bg-blue-900 text-white p-6 shadow-md">
-        <div className="max-w-6xl mx-auto">
+    <div className="min-h-screen bg-gray-50 text-gray-900 font-sans flex flex-col">
+      
+      {/* Header with Toggle Button */}
+      <header className="bg-blue-900 text-white p-6 shadow-md flex flex-col md:flex-row justify-between md:items-center">
+        <div>
           <h1 className="text-3xl font-bold">RME 4221: Machine Learning</h1>
           <h2 className="text-xl mt-2 text-blue-200">Presentation Assessment</h2>
           <p className="mt-1 text-sm">Md. Abid Chowdhury</p>
         </div>
+        
+        {/* The Magic Toggle */}
+        <button 
+          onClick={() => setShowExplorer(!showExplorer)}
+          className="mt-4 md:mt-0 px-6 py-3 rounded-lg font-bold shadow-lg transition-transform hover:scale-105 active:scale-95 flex items-center gap-2 bg-yellow-500 text-blue-900 hover:bg-yellow-400"
+        >
+          {showExplorer ? '📄 Return to Previous' : '⚙️ Open Interactive Explorer'}
+        </button>
       </header>
 
-      <nav className="bg-white shadow-sm sticky top-0 z-10">
-        <div className="max-w-6xl mx-auto flex space-x-4 p-4 overflow-x-auto">
-          {architectures.map((arch) => (
-            <button
-              key={arch.id}
-              onClick={() => setActiveTab(arch.id)}
-              className={`px-4 py-2 rounded-md font-medium whitespace-nowrap transition-colors ${
-                activeTab === arch.id ? 'bg-blue-600 text-white' : 'bg-gray-200 hover:bg-gray-300'
-              }`}
-            >
-              {arch.id}: {arch.name}
-            </button>
-          ))}
-        </div>
-      </nav>
+      {/* Conditional Rendering: Show Iframe OR React Presentation */}
+      {showExplorer ? (
+        
+        // Iframe pointing to the public HTML file
+        <iframe 
+          src="/cnn_architecture_explorer.html" 
+          title="CNN Architecture Explorer"
+          className="w-full flex-grow border-0"
+          style={{ height: 'calc(100vh - 120px)' }} // Takes up remaining screen height
+        />
 
-      <main className="max-w-6xl mx-auto p-6 mt-6 bg-white shadow-lg rounded-lg">
-        {architectures.find((a) => a.id === activeTab)?.component}
-      </main>
+      ) : (
+        
+        // Original React Layout
+        <>
+          <nav className="bg-white shadow-sm sticky top-0 z-10">
+            <div className="max-w-6xl mx-auto flex space-x-4 p-4 overflow-x-auto">
+              {architectures.map((arch) => (
+                <button
+                  key={arch.id}
+                  onClick={() => setActiveTab(arch.id)}
+                  className={`px-4 py-2 rounded-md font-medium whitespace-nowrap transition-colors ${
+                    activeTab === arch.id ? 'bg-blue-600 text-white' : 'bg-gray-200 hover:bg-gray-300'
+                  }`}
+                >
+                  {arch.id}: {arch.name}
+                </button>
+              ))}
+            </div>
+          </nav>
+
+          <main className="max-w-6xl w-full mx-auto p-6 mt-6 bg-white shadow-lg rounded-lg flex-grow mb-10">
+            {architectures.find((a) => a.id === activeTab)?.component}
+          </main>
+        </>
+        
+      )}
     </div>
   );
 }

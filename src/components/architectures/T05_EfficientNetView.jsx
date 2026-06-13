@@ -56,6 +56,8 @@ export default function T05_EfficientNetView() {
           <li><strong>State-of-the-Art Efficiency:</strong> EfficientNet-B7 achieved SOTA 84.3% top-1 accuracy on ImageNet while being 8.4x smaller and 6.1x faster on inference than the previous best model (GPipe).</li>
           <li><strong>Transfer Learning:</strong> The models transfer exceptionally well to other datasets (like CIFAR-100 and Flowers), achieving SOTA accuracy with a fraction of the parameters.</li>
           <li><strong>New Standard:</strong> The compound scaling method fundamentally changed how the industry approaches model scaling, shifting the focus from manual trial-and-error to systematic grid search formulas.</li>
+          <li><strong>Numerical Example:</strong> EfficientNet-B7 achieves 84.3% top-1 accuracy on ImageNet while being 8.4x smaller and 6.1x faster on inference than the previous best model (GPipe).</li>
+          <li><strong>Real-World Impact:</strong> High-accuracy satellite imagery analysis. Companies use it when they need maximum predictive performance but have a strict cloud-computing budget for scaling.</li>
         </ul>
       </section>
 

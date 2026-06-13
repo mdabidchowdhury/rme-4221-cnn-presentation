@@ -46,6 +46,8 @@ export default function ResNetView() {
           <li><strong>ImageNet Performance:</strong> ResNet won the ILSVRC 2015 classification task with a top-5 error rate of 3.57%, surpassing human-level performance on this specific dataset.</li>
           <li><strong>Depth Scale:</strong> Allowed successful training of networks with 152 layers (ResNet-152), compared to VGG-16's 16 layers.</li>
           <li><strong>Legacy:</strong> Skip connections became a fundamental building block in modern deep learning, heavily influencing architectures like Transformers, DenseNet, and U-Net.</li>
+          <li><strong>Numerical Example:</strong>ResNet-152 successfully trained 152 layers deep with ~60 million parameters, achieving a massive breakthrough with a 3.57% top-5 error on ImageNet.</li>
+          <li><strong>Practical Applications:</strong> Medical imaging (MRI/X-ray analysis) where extremely deep feature extraction is needed to find microscopic anomalies without the network suffering from vanishing gradients.</li>
         </ul>
       </section>
 

@@ -52,6 +52,8 @@ export default function T08_XceptionView() {
           <li><strong>Outperforming Inception:</strong> Xception slightly outperformed Inception V3 on ImageNet while having exactly the same number of parameters (~23 million), proving its parameter utilization was mathematically superior.</li>
           <li><strong>Large-Scale Dominance:</strong> On Google's massive internal JFT dataset (350 million images), Xception showed significant improvements over Inception V3, indicating better scaling capacity.</li>
           <li><strong>Framework Integration:</strong> Due to its elegant, homogeneous design, it became a standard, easy-to-implement baseline model in frameworks like Keras and TensorFlow.</li>
+          <li><strong>Numerical Example:</strong> Xception matches Inception V3's parameter count (~23 million) but improves Top-1 accuracy from 78.2% to 79.0% simply by mathematically reordering the convolution steps.</li>
+          <li><strong>Real-World Applications:</strong> Large-scale commercial image search engines (like Google Image Search). The high parameter efficiency translates to millions of dollars in server cost savings at scale.</li>
         </ul>
       </section>
 

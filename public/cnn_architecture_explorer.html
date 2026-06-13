@@ -1,0 +1,2118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CNN Architecture Explorer — RME 4221</title>
+<style>
+:root {
+  --bg: #0e0f11;
+  --bg2: #161820;
+  --bg3: #1e2028;
+  --bg4: #252730;
+  --border: #2a2d38;
+  --border2: #363a48;
+  --text: #e8eaf0;
+  --text2: #9ba3b8;
+  --text3: #5c6480;
+  --blue: #4f8ef7;
+  --blue-bg: #0f1e3a;
+  --blue-border: #1e3a6e;
+  --green: #3ecf8e;
+  --green-bg: #0a2a1e;
+  --green-border: #1a5040;
+  --amber: #f5a623;
+  --amber-bg: #2a1e08;
+  --amber-border: #5a3e10;
+  --red: #e85858;
+  --red-bg: #2a0e0e;
+  --red-border: #5a1e1e;
+  --purple: #a78bfa;
+  --purple-bg: #1a1028;
+  --mono: 'JetBrains Mono', 'Fira Code', 'Cascadia Code', monospace;
+  --sans: 'Inter', system-ui, -apple-system, sans-serif;
+  --radius: 8px;
+  --radius-sm: 5px;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { background: var(--bg); color: var(--text); font-family: var(--sans); font-size: 14px; line-height: 1.6; min-height: 100vh; }
+a { color: var(--blue); text-decoration: none; }
+
+/* ── Layout ────────────────────────────────── */
+#sidebar {
+  position: fixed; left: 0; top: 0; bottom: 0; width: 220px;
+  background: var(--bg2); border-right: 1px solid var(--border);
+  overflow-y: auto; z-index: 10; padding: 16px 0;
+}
+#main { margin-left: 220px; padding: 28px 32px 60px; max-width: 960px; }
+
+.sidebar-header {
+  padding: 0 16px 16px;
+  border-bottom: 1px solid var(--border);
+  margin-bottom: 12px;
+}
+.sidebar-title { font-size: 11px; font-weight: 600; color: var(--text3); letter-spacing: 0.08em; text-transform: uppercase; }
+.sidebar-sub { font-size: 11px; color: var(--text3); margin-top: 2px; }
+
+.arch-btn {
+  display: block; width: 100%; padding: 8px 16px;
+  background: none; border: none; text-align: left;
+  color: var(--text2); font-size: 13px; cursor: pointer;
+  transition: all 0.15s; border-left: 2px solid transparent;
+  font-family: var(--sans);
+}
+.arch-btn:hover { background: var(--bg3); color: var(--text); }
+.arch-btn.active { background: var(--blue-bg); color: var(--blue); border-left-color: var(--blue); font-weight: 500; }
+.arch-btn .code { font-size: 10px; font-family: var(--mono); color: var(--text3); margin-right: 6px; }
+.arch-btn.active .code { color: var(--blue); opacity: 0.7; }
+
+/* ── Page header ───────────────────────────── */
+.page-header { margin-bottom: 28px; }
+.arch-name { font-size: 30px; font-weight: 700; color: var(--text); letter-spacing: -0.02em; }
+.arch-meta { display: flex; gap: 12px; align-items: center; margin-top: 6px; flex-wrap: wrap; }
+.badge { font-size: 11px; padding: 3px 9px; border-radius: 20px; font-family: var(--mono); font-weight: 500; }
+.badge-blue { background: var(--blue-bg); color: var(--blue); border: 1px solid var(--blue-border); }
+.badge-green { background: var(--green-bg); color: var(--green); border: 1px solid var(--green-border); }
+.arch-tagline { font-size: 14px; color: var(--text2); margin-top: 8px; font-style: italic; }
+
+/* ── Tabs ──────────────────────────────────── */
+.tab-bar {
+  display: flex; gap: 2px; border-bottom: 1px solid var(--border);
+  margin-bottom: 24px; overflow-x: auto;
+}
+.tab-btn {
+  background: none; border: none; border-bottom: 2px solid transparent;
+  padding: 8px 14px; font-size: 13px; color: var(--text3); cursor: pointer;
+  margin-bottom: -1px; white-space: nowrap; font-family: var(--sans);
+  transition: all 0.15s;
+}
+.tab-btn:hover { color: var(--text2); }
+.tab-btn.active { color: var(--blue); border-bottom-color: var(--blue); font-weight: 500; }
+
+/* ── Section content ───────────────────────── */
+.section { display: none; }
+.section.active { display: block; }
+
+.prose { font-size: 14px; color: var(--text2); line-height: 1.8; margin-bottom: 14px; }
+.sec-h { font-size: 14px; font-weight: 600; color: var(--text); margin: 18px 0 8px; }
+.sec-ul { font-size: 14px; color: var(--text2); line-height: 1.9; padding-left: 20px; margin-bottom: 14px; }
+.sec-ul li { margin-bottom: 2px; }
+
+.callout {
+  border-left: 3px solid; border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+  padding: 10px 14px; margin: 12px 0; font-size: 13px; line-height: 1.7;
+}
+.callout-blue { background: var(--blue-bg); border-color: var(--blue); color: var(--blue); }
+.callout-green { background: var(--green-bg); border-color: var(--green); color: var(--green); }
+.callout-amber { background: var(--amber-bg); border-color: var(--amber); color: var(--amber); }
+.callout-purple { background: var(--purple-bg); border-color: var(--purple); color: var(--purple); }
+
+.formula {
+  background: var(--bg3); border: 1px solid var(--border);
+  border-radius: var(--radius); padding: 12px 16px;
+  font-family: var(--mono); font-size: 12.5px; color: var(--text);
+  margin: 10px 0; overflow-x: auto; line-height: 1.8;
+  white-space: pre;
+}
+
+/* ── Table ─────────────────────────────────── */
+.tbl-wrap { overflow-x: auto; margin: 12px 0; border-radius: var(--radius); border: 1px solid var(--border); }
+table { width: 100%; border-collapse: collapse; font-size: 13px; }
+th { background: var(--bg3); padding: 9px 14px; text-align: left; color: var(--text3); font-weight: 600; font-size: 11px; letter-spacing: 0.05em; text-transform: uppercase; border-bottom: 1px solid var(--border); }
+td { padding: 9px 14px; color: var(--text2); border-bottom: 1px solid var(--border); }
+tr:last-child td { border-bottom: none; }
+td:first-child { color: var(--text); font-weight: 500; }
+tr:hover td { background: var(--bg3); }
+
+/* ── Demo area ─────────────────────────────── */
+.demo-wrap { background: var(--bg2); border: 1px solid var(--border); border-radius: var(--radius); padding: 20px; margin: 8px 0 20px; }
+.demo-title { font-size: 14px; font-weight: 600; color: var(--text); margin-bottom: 4px; }
+.demo-sub { font-size: 12px; color: var(--text3); margin-bottom: 16px; }
+.btn { background: var(--bg3); border: 1px solid var(--border2); border-radius: var(--radius-sm); padding: 6px 14px; font-size: 12px; color: var(--text2); cursor: pointer; font-family: var(--sans); transition: all 0.15s; }
+.btn:hover { background: var(--bg4); color: var(--text); border-color: var(--text3); }
+.btn-group { display: flex; gap: 8px; margin-bottom: 16px; }
+
+/* ── Flow blocks ───────────────────────────── */
+.flow { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin: 10px 0; }
+.flow-col { display: flex; flex-direction: column; align-items: center; gap: 8px; margin: 10px 0; }
+.blk {
+  background: var(--bg3); border: 1px solid var(--border2);
+  border-radius: var(--radius-sm); padding: 8px 14px;
+  text-align: center; min-width: 80px; transition: all 0.3s;
+  font-size: 12px; color: var(--text3);
+}
+.blk sub { display: block; font-size: 10px; margin-top: 2px; font-family: var(--mono); }
+.blk-blue { background: var(--blue-bg) !important; border-color: var(--blue-border) !important; color: var(--blue) !important; }
+.blk-green { background: var(--green-bg) !important; border-color: var(--green-border) !important; color: var(--green) !important; }
+.blk-amber { background: var(--amber-bg) !important; border-color: var(--amber-border) !important; color: var(--amber) !important; }
+.blk-red { background: var(--red-bg) !important; border-color: var(--red-border) !important; color: var(--red) !important; }
+.blk-purple { background: var(--purple-bg) !important; border-color: var(--purple-border) !important; color: var(--purple) !important; }
+.arrow { color: var(--border2); font-size: 18px; transition: color 0.3s; user-select: none; }
+.arrow.lit { color: var(--blue); }
+
+/* ── Grid helpers ──────────────────────────── */
+.grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin: 12px 0; }
+.grid3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; margin: 12px 0; }
+.stat-card {
+  background: var(--bg3); border: 1px solid var(--border);
+  border-radius: var(--radius); padding: 14px;
+}
+.stat-card .label { font-size: 11px; color: var(--text3); margin-bottom: 4px; }
+.stat-card .val { font-size: 24px; font-weight: 700; font-family: var(--mono); }
+.stat-card .sub { font-size: 11px; color: var(--text3); margin-top: 2px; }
+
+/* ── Slider ────────────────────────────────── */
+input[type=range] { width: 100%; accent-color: var(--blue); cursor: pointer; }
+input[type=number] { background: var(--bg3); border: 1px solid var(--border2); border-radius: var(--radius-sm); color: var(--text); padding: 5px 8px; font-family: var(--mono); font-size: 13px; width: 80px; }
+.label-row { display: flex; justify-content: space-between; align-items: center; font-size: 12px; color: var(--text3); margin-bottom: 4px; }
+.ctrl-val { font-family: var(--mono); color: var(--text2); }
+.ctrl-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 14px; }
+.ctrl-grid3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; margin-bottom: 14px; }
+
+/* ── Skip connection SVG diagram ───────────── */
+.skip-svg { width: 100%; max-width: 640px; display: block; margin: 0 auto; }
+
+/* ── Ref ───────────────────────────────────── */
+.ref-item { padding: 10px 0; border-bottom: 1px solid var(--border); font-size: 13px; color: var(--text2); line-height: 1.6; }
+.ref-item:last-child { border-bottom: none; }
+.ref-num { font-family: var(--mono); color: var(--blue); margin-right: 8px; font-size: 11px; }
+
+/* ── Responsive ────────────────────────────── */
+@media (max-width: 768px) {
+  #sidebar { width: 100%; position: static; border-right: none; border-bottom: 1px solid var(--border); padding: 12px; }
+  #sidebar .sidebar-header { display: none; }
+  #sidebar { display: flex; flex-wrap: wrap; gap: 4px; padding: 10px; }
+  .arch-btn { width: auto; padding: 5px 10px; font-size: 12px; border-left: none; border-radius: 20px; border: 1px solid var(--border); }
+  .arch-btn.active { border-color: var(--blue); }
+  #main { margin-left: 0; padding: 16px; }
+  .grid2, .grid3 { grid-template-columns: 1fr; }
+  .ctrl-grid, .ctrl-grid3 { grid-template-columns: 1fr; }
+}
+@media (prefers-reduced-motion: reduce) {
+  * { transition: none !important; animation: none !important; }
+}
+</style>
+</head>
+<body>
+
+<div id="sidebar">
+  <div class="sidebar-header">
+    <div class="sidebar-title">RME 4221</div>
+    <div class="sidebar-sub">CNN Architectures</div>
+  </div>
+  <button class="arch-btn active" onclick="show('resnet')" id="btn-resnet"><span class="code">T-01</span>ResNet</button>
+  <button class="arch-btn" onclick="show('densenet')" id="btn-densenet"><span class="code">T-02</span>DenseNet</button>
+  <button class="arch-btn" onclick="show('mobilenet')" id="btn-mobilenet"><span class="code">T-03</span>MobileNet</button>
+  <button class="arch-btn" onclick="show('squeezenet')" id="btn-squeezenet"><span class="code">T-04</span>SqueezeNet</button>
+  <button class="arch-btn" onclick="show('efficientnet')" id="btn-efficientnet"><span class="code">T-05</span>EfficientNet</button>
+  <button class="arch-btn" onclick="show('resnext')" id="btn-resnext"><span class="code">T-06</span>ResNeXt</button>
+  <button class="arch-btn" onclick="show('shufflenet')" id="btn-shufflenet"><span class="code">T-07</span>ShuffleNet</button>
+  <button class="arch-btn" onclick="show('xception')" id="btn-xception"><span class="code">T-08</span>Xception</button>
+  <button class="arch-btn" onclick="show('nasnet')" id="btn-nasnet"><span class="code">T-09</span>NASNet</button>
+  <button class="arch-btn" onclick="show('mobilenetv2')" id="btn-mobilenetv2"><span class="code">T-10</span>MobileNetV2</button>
+  <button class="arch-btn" onclick="show('convnext')" id="btn-convnext"><span class="code">T-11</span>ConvNeXt</button>
+  <button class="arch-btn" onclick="show('senet')" id="btn-senet"><span class="code">T-12</span>SENet</button>
+</div>
+
+<div id="main">
+<!-- ═══════════════ RESNET ═══════════════ -->
+<div id="page-resnet" class="arch-page">
+  <div class="page-header">
+    <div class="arch-name">ResNet</div>
+    <div class="arch-meta">
+      <span class="badge badge-blue">T-01</span>
+      <span class="badge badge-green">He et al., CVPR 2016</span>
+    </div>
+    <div class="arch-tagline">Deep Residual Learning for Image Recognition</div>
+  </div>
+  <div class="tab-bar">
+    <button class="tab-btn active" onclick="showTab('resnet','motivation',this)">Motivation</button>
+    <button class="tab-btn" onclick="showTab('resnet','architecture',this)">Architecture</button>
+    <button class="tab-btn" onclick="showTab('resnet','demo',this)">Interactive Demo</button>
+    <button class="tab-btn" onclick="showTab('resnet','results',this)">Results &amp; Impact</button>
+    <button class="tab-btn" onclick="showTab('resnet','reflection',this)">Reflection</button>
+    <button class="tab-btn" onclick="showTab('resnet','refs',this)">References</button>
+  </div>
+
+  <div id="resnet-motivation" class="section active">
+    <p class="prose">Before ResNet, the assumption was simple: more layers = better accuracy. In 2015, He et al. found the opposite. A 56-layer plain network performed <em>worse</em> than a 20-layer one — not just on test data, but on training data too. This ruled out overfitting. The problem was optimization.</p>
+    <h3 class="sec-h">The Degradation Problem</h3>
+    <ul class="sec-ul">
+      <li>Gradients shrink exponentially as they backpropagate through many layers (vanishing gradients)</li>
+      <li>The error signal effectively disappears before reaching shallow layers</li>
+      <li>Networks struggle to learn identity mappings — even when "do nothing" is the optimal solution</li>
+      <li>Batch normalization helped but didn't fully solve the problem beyond ~30 layers</li>
+    </ul>
+    <div class="callout callout-blue"><strong>Core insight:</strong> If the optimal transformation is close to identity, it's easier to learn F(x) = 0 (a small residual/deviation) than to learn H(x) = x directly. The skip connection handles the identity for free — the layers only learn the correction.</div>
+    <h3 class="sec-h">Prior Work Limitations</h3>
+    <ul class="sec-ul">
+      <li><strong>Highway Networks (2015):</strong> Used gated skip connections, but gates required extra parameters and the depth gains were modest</li>
+      <li><strong>Plain deep nets (VGG etc.):</strong> Accuracy saturated and then degraded with depth</li>
+      <li><strong>Batch Normalization:</strong> Fixed internal covariate shift but did not solve the fundamental gradient flow problem at extreme depth</li>
+    </ul>
+  </div>
+
+  <div id="resnet-architecture" class="section">
+    <p class="prose">A residual block adds the input x directly to the output of a small stack of layers F(x). The final output H(x) = F(x) + x. The layers no longer need to learn the full mapping — only the residual (the deviation from the identity).</p>
+    <div class="formula">H(x) = F(x) + x
+
+F(x) = W₂ · ReLU(W₁x + b₁) + b₂   ← the residual mapping
+
+If optimal F(x) ≈ 0  →  H(x) ≈ x   (identity, effortlessly)
+If optimal F(x) ≈ Δ  →  the block learns only the small correction Δ</div>
+    <h3 class="sec-h">Building Block Variants</h3>
+    <div class="grid2">
+      <div class="stat-card">
+        <div class="label">Basic Block (ResNet-18/34)</div>
+        <div style="font-family:var(--mono);font-size:12px;color:var(--text2);line-height:2;margin-top:8px">
+          Conv 3×3, BN, ReLU<br>Conv 3×3, BN<br>+ skip<br>ReLU
+        </div>
+        <div class="sub" style="margin-top:8px">2 layers per block</div>
+      </div>
+      <div class="stat-card">
+        <div class="label">Bottleneck Block (ResNet-50/101/152)</div>
+        <div style="font-family:var(--mono);font-size:12px;color:var(--text2);line-height:2;margin-top:8px">
+          Conv 1×1 (reduce)<br>Conv 3×3<br>Conv 1×1 (restore)<br>+ skip → ReLU
+        </div>
+        <div class="sub" style="margin-top:8px">3× cheaper than naive 3-layer version</div>
+      </div>
+    </div>
+    <h3 class="sec-h">Key Design Choices</h3>
+    <ul class="sec-ul">
+      <li><strong>Shortcut with no parameters:</strong> When input/output dimensions match, the skip is a direct wire — zero extra cost</li>
+      <li><strong>Projection shortcut:</strong> When dimensions differ (different channels or stride), a 1×1 conv maps x to the right size</li>
+      <li><strong>BN before ReLU:</strong> Normalizes before activation — stabilizes training at all depths</li>
+      <li><strong>Global Average Pooling:</strong> Replaces large fully-connected layers at the end — huge parameter reduction</li>
+    </ul>
+    <div class="callout callout-green">ResNet-50 uses the bottleneck design: 256 channels → 64 (1×1) → 64 (3×3) → 256 (1×1). This 3-layer bottleneck costs the same FLOPs as a single 3×3 conv on 64 channels, but has 256-channel capacity.</div>
+  </div>
+
+  <div id="resnet-demo" class="section">
+    <div class="demo-wrap">
+      <div class="demo-title">Residual Block — Animated Forward Pass</div>
+      <div class="demo-sub">Set an input value, click Run, and watch how F(x) and the skip x combine to form H(x).</div>
+      <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:16px">
+        <label style="font-size:12px;color:var(--text2)">Input x =</label>
+        <input type="number" id="rn-x" value="10" min="-50" max="100">
+        <label style="font-size:12px;color:var(--text2)">W1 =</label>
+        <input type="number" id="rn-w1" value="0.6" step="0.1" min="0" max="2">
+        <label style="font-size:12px;color:var(--text2)">W2 =</label>
+        <input type="number" id="rn-w2" value="0.5" step="0.1" min="0" max="2">
+        <div class="btn-group" style="margin-bottom:0">
+          <button class="btn" onclick="rnRun()">▶ Run</button>
+          <button class="btn" onclick="rnReset()">↺ Reset</button>
+        </div>
+      </div>
+      <div id="rn-diagram"></div>
+      <div id="rn-msg" style="margin-top:12px"></div>
+    </div>
+    <div class="demo-wrap" style="margin-top:16px">
+      <div class="demo-title">Gradient Flow Comparison — Why Deep Plain Nets Fail</div>
+      <div class="demo-sub">Simulates how gradient magnitude changes over depth. Drag to adjust depth.</div>
+      <div class="label-row"><span>Network Depth</span><span class="ctrl-val" id="rn-depth-v">20 layers</span></div>
+      <input type="range" id="rn-depth" min="5" max="100" value="20" oninput="rnGrad()">
+      <div id="rn-grad-chart" style="margin-top:12px"></div>
+    </div>
+  </div>
+
+  <div id="resnet-results" class="section">
+    <div class="callout callout-green">Won ILSVRC 2015 across classification, detection, and localization. Achieved 3.57% top-5 error — surpassing estimated human-level performance (~5.1%).</div>
+    <div class="tbl-wrap">
+      <table>
+        <tr><th>Model</th><th>Top-1 (ImageNet)</th><th>Top-5</th><th>Params</th><th>Depth</th></tr>
+        <tr><td>Plain-34 (no skip)</td><td>73.6%</td><td>91.3%</td><td>21.8M</td><td>34</td></tr>
+        <tr><td>ResNet-34</td><td>75.3%</td><td>92.3%</td><td>21.8M</td><td>34</td></tr>
+        <tr><td>ResNet-50</td><td>76.0%</td><td>92.9%</td><td>25.6M</td><td>50</td></tr>
+        <tr><td>ResNet-101</td><td>77.4%</td><td>93.8%</td><td>44.5M</td><td>101</td></tr>
+        <tr><td>ResNet-152</td><td>77.8%</td><td>93.8%</td><td>60.2M</td><td>152</td></tr>
+      </table>
+    </div>
+    <h3 class="sec-h">Influence on Subsequent Work</h3>
+    <ul class="sec-ul">
+      <li>Became the universal backbone for Faster R-CNN (detection), Mask R-CNN (segmentation), FPN (feature pyramids)</li>
+      <li>First architecture proven to train networks of 1000+ layers reliably</li>
+      <li>Residual connections are now in Transformers (each attention block has a skip), LSTMs, and U-Nets</li>
+      <li>As of 2024, ResNet variants are still deployed in production systems worldwide</li>
+    </ul>
+  </div>
+
+  <div id="resnet-reflection" class="section">
+    <p class="prose">ResNet fundamentally changed how depth is perceived in neural networks — from an obstacle into a design dial. The residual learning hypothesis proved networks prefer to learn small corrections rather than complete transformations from scratch.</p>
+    <h3 class="sec-h">Limitations</h3>
+    <ul class="sec-ul">
+      <li>Skip connections require two tensors in memory simultaneously — higher memory footprint than plain nets</li>
+      <li>Standard 3×3 kernels limit how fast the receptive field grows per layer</li>
+      <li>No channel-wise attention — all channels treated equally regardless of input content</li>
+      <li>FLOPs grow quadratically with width — less efficient than depthwise approaches</li>
+    </ul>
+    <div class="callout callout-amber"><strong>Open question:</strong> Why exactly does residual learning work? Current theories include: (1) it creates an implicit ensemble of shallow networks, (2) it smooths the loss landscape, (3) it creates gradient highways. No single complete theory exists.</div>
+    <h3 class="sec-h">What We Can Learn</h3>
+    <ul class="sec-ul">
+      <li>Reparameterize difficult optimization problems — learn deviations rather than full targets</li>
+      <li>Simple inductive biases (identity shortcut) can have outsized impact on trainability</li>
+      <li>Architecture choices are not separable from optimization dynamics</li>
+    </ul>
+  </div>
+
+  <div id="resnet-refs" class="section">
+    <div class="ref-item"><span class="ref-num">[1]</span> He, K., Zhang, X., Ren, S., &amp; Sun, J. (2016). Deep residual learning for image recognition. <em>CVPR 2016</em>. arXiv:1512.03385</div>
+    <div class="ref-item"><span class="ref-num">[2]</span> He, K., Zhang, X., Ren, S., &amp; Sun, J. (2016). Identity mappings in deep residual networks. <em>ECCV 2016</em>. arXiv:1603.05027</div>
+    <div class="ref-item"><span class="ref-num">[3]</span> Veit, A., Wilber, M., &amp; Belongie, S. (2016). Residual networks behave like ensembles of relatively shallow networks. <em>NeurIPS 2016</em>. arXiv:1605.06431</div>
+    <div class="ref-item"><span class="ref-num">[4]</span> Li, H., Xu, Z., Taylor, G., Studer, C., &amp; Goldstein, T. (2018). Visualizing the loss landscape of neural nets. <em>NeurIPS 2018</em>. arXiv:1712.09913</div>
+  </div>
+</div>
+
+<!-- ═══════════════ DENSENET ═══════════════ -->
+<div id="page-densenet" class="arch-page" style="display:none">
+  <div class="page-header">
+    <div class="arch-name">DenseNet</div>
+    <div class="arch-meta">
+      <span class="badge badge-blue">T-02</span>
+      <span class="badge badge-green">Huang et al., CVPR 2017</span>
+    </div>
+    <div class="arch-tagline">Densely Connected Convolutional Networks</div>
+  </div>
+  <div class="tab-bar">
+    <button class="tab-btn active" onclick="showTab('densenet','motivation',this)">Motivation</button>
+    <button class="tab-btn" onclick="showTab('densenet','architecture',this)">Architecture</button>
+    <button class="tab-btn" onclick="showTab('densenet','demo',this)">Interactive Demo</button>
+    <button class="tab-btn" onclick="showTab('densenet','results',this)">Results &amp; Impact</button>
+    <button class="tab-btn" onclick="showTab('densenet','reflection',this)">Reflection</button>
+    <button class="tab-btn" onclick="showTab('densenet','refs',this)">References</button>
+  </div>
+  <div id="densenet-motivation" class="section active">
+    <p class="prose">ResNet showed skip connections help. But it only connected a layer to the one immediately after it. DenseNet asks: why stop there? What if every layer connects directly to every subsequent layer?</p>
+    <ul class="sec-ul">
+      <li>Even with ResNet, early-layer features can be diluted or overwritten by later layers</li>
+      <li>Feature maps from shallow layers (edges, textures) are still useful deep in the network</li>
+      <li>ResNet adds F(x)+x — the skip blends features. DenseNet concatenates — all features are preserved</li>
+      <li>Implicit deep supervision: gradients flow directly from the loss to every layer</li>
+    </ul>
+    <div class="callout callout-blue"><strong>Key insight:</strong> Concatenating (not adding) all previous feature maps forces each new layer to learn complementary, non-redundant features. This leads to dramatically better parameter efficiency.</div>
+  </div>
+  <div id="densenet-architecture" class="section">
+    <p class="prose">In a dense block with L layers, there are L(L+1)/2 connections. Layer l receives the concatenation of all previous outputs [x₀, x₁, …, x_{l-1}] as input. Each layer produces exactly k new feature maps — the growth rate.</p>
+    <div class="formula">x_l = H_l([x_0, x_1, ..., x_{l-1}])
+
+Input channels to layer l:  k₀ + k × (l-1)
+   k₀ = initial channels,  k = growth rate
+
+H_l = BN → ReLU → Conv 3×3   (composite function)
+
+Bottleneck variant:
+H_l = BN → ReLU → Conv 1×1 (4k ch) → BN → ReLU → Conv 3×3 (k ch)</div>
+    <h3 class="sec-h">Key Design Choices</h3>
+    <ul class="sec-ul">
+      <li><strong>Growth rate k:</strong> Typically 12–32. Each layer adds only k channels — keeping the network narrow</li>
+      <li><strong>Transition layers:</strong> Between dense blocks — 1×1 conv (compression) + 2×2 avg pool. Compression ratio θ=0.5 halves channels</li>
+      <li><strong>Bottleneck:</strong> 1×1 conv before 3×3 reduces the concatenated input width cheaply</li>
+      <li><strong>No width explosion:</strong> With k=32 and 4 layers, layer 4 input = k₀ + 3×32 channels — manageable</li>
+    </ul>
+    <div class="callout callout-green">With k=12, a 4-layer dense block: Layer 1 gets 16ch → outputs 12. Layer 2 gets 28ch → outputs 12. Layer 3 gets 40ch → outputs 12. Layer 4 gets 52ch → outputs 12. Total connections: 4×5/2 = 10 vs 4 in a plain net.</div>
+  </div>
+  <div id="densenet-demo" class="section">
+    <div class="demo-wrap">
+      <div class="demo-title">Dense Connectivity — Channel Growth</div>
+      <div class="demo-sub">Visualise how channels accumulate as each layer concatenates all previous outputs. Growth rate k=12.</div>
+      <div class="label-row"><span>Number of dense layers</span><span class="ctrl-val" id="dn-L-v">4</span></div>
+      <input type="range" id="dn-L" min="1" max="8" value="4" oninput="dnUpdate()">
+      <div id="dn-diagram" style="margin-top:14px"></div>
+    </div>
+    <div class="demo-wrap" style="margin-top:16px">
+      <div class="demo-title">DenseNet vs ResNet vs Plain — Connection Count</div>
+      <div id="dn-connections"></div>
+    </div>
+  </div>
+  <div id="densenet-results" class="section">
+    <div class="tbl-wrap"><table>
+      <tr><th>Model</th><th>CIFAR-10 Error</th><th>CIFAR-100 Error</th><th>Params</th></tr>
+      <tr><td>ResNet-110</td><td>6.61%</td><td>25.16%</td><td>1.7M</td></tr>
+      <tr><td>DenseNet-BC (k=12)</td><td>4.51%</td><td>22.27%</td><td>0.8M</td></tr>
+      <tr><td>DenseNet-121 (k=32)</td><td>—</td><td>—</td><td>8.0M (74.4% ImageNet)</td></tr>
+      <tr><td>DenseNet-201 (k=32)</td><td>—</td><td>—</td><td>20M (77.4% ImageNet)</td></tr>
+    </table></div>
+    <div class="callout callout-green">DenseNet-BC achieves the same CIFAR accuracy as ResNet-110 with less than half the parameters. The compression (transition layers + bottleneck) is critical — raw DenseNet without it is much larger.</div>
+  </div>
+  <div id="densenet-reflection" class="section">
+    <h3 class="sec-h">Limitations</h3>
+    <ul class="sec-ul">
+      <li><strong>Memory:</strong> All intermediate feature maps must be kept in GPU memory simultaneously — O(L²) memory</li>
+      <li><strong>Implementation:</strong> Concatenation across layers requires careful memory management (memory-efficient DenseNet paper addressed this)</li>
+      <li><strong>Hardware efficiency:</strong> Wide concatenated tensors don't map as cleanly to GPU tensor cores as standard convolutions</li>
+    </ul>
+    <div class="callout callout-amber">DenseNet's real lasting contribution may be demonstrating implicit deep supervision — the idea that every layer should receive a direct gradient signal from the loss. This influenced training strategies more than the exact connectivity pattern.</div>
+  </div>
+  <div id="densenet-refs" class="section">
+    <div class="ref-item"><span class="ref-num">[1]</span> Huang, G., Liu, Z., van der Maaten, L., &amp; Weinberger, K. Q. (2017). Densely connected convolutional networks. <em>CVPR 2017</em>. arXiv:1608.06993</div>
+    <div class="ref-item"><span class="ref-num">[2]</span> Pleiss, G., Chen, D., Huang, G., Li, T., van der Maaten, L., &amp; Weinberger, K. Q. (2017). Memory-efficient implementation of DenseNets. arXiv:1707.06990</div>
+  </div>
+</div>
+
+<!-- ═══════════════ MOBILENET ═══════════════ -->
+<div id="page-mobilenet" class="arch-page" style="display:none">
+  <div class="page-header">
+    <div class="arch-name">MobileNet</div>
+    <div class="arch-meta">
+      <span class="badge badge-blue">T-03</span>
+      <span class="badge badge-green">Howard et al., 2017</span>
+    </div>
+    <div class="arch-tagline">Efficient Convolutional Neural Networks for Mobile Applications</div>
+  </div>
+  <div class="tab-bar">
+    <button class="tab-btn active" onclick="showTab('mobilenet','motivation',this)">Motivation</button>
+    <button class="tab-btn" onclick="showTab('mobilenet','architecture',this)">Architecture</button>
+    <button class="tab-btn" onclick="showTab('mobilenet','demo',this)">Interactive Demo</button>
+    <button class="tab-btn" onclick="showTab('mobilenet','results',this)">Results &amp; Impact</button>
+    <button class="tab-btn" onclick="showTab('mobilenet','reflection',this)">Reflection</button>
+    <button class="tab-btn" onclick="showTab('mobilenet','refs',this)">References</button>
+  </div>
+  <div id="mobilenet-motivation" class="section active">
+    <p class="prose">AlexNet required 240MB of weights and ~720M multiply-accumulate operations per inference pass — far too heavy for a smartphone, drone, or IoT sensor. MobileNet asks: can we factor the convolution operation into something much cheaper without losing accuracy?</p>
+    <ul class="sec-ul">
+      <li>Mobile/embedded: &lt;512MB RAM, no discrete GPU, strict power budget</li>
+      <li>A standard 3×3 conv on 128 input channels to 256 output channels = 3×3×128×256 = 294,912 parameters per layer</li>
+      <li>SqueezeNet reduced parameters, but not FLOPs — inference speed barely improved</li>
+    </ul>
+    <div class="callout callout-blue"><strong>Mathematical insight:</strong> Standard convolution mixes spatial filtering (where) and channel combination (what) in a single step. These two operations can be factored — spatial first (depthwise, one filter per channel), then channel (pointwise, 1×1) — with a theoretically provable reduction of 1/N + 1/D_k² ≈ 8–9× for k=3.</div>
+  </div>
+  <div id="mobilenet-architecture" class="section">
+    <div class="formula">Standard Conv:
+  params = D_k × D_k × M × N
+  FLOPs  = D_k × D_k × M × N × D_f × D_f
+
+Depthwise Separable Conv:
+  Depthwise: D_k × D_k × M          (1 filter per input channel)
+  Pointwise: 1 × 1 × M × N         (combine channels)
+  Total FLOPs = D_k²·M·D_f² + M·N·D_f²
+
+Reduction ratio:  1/N  +  1/D_k²
+  For N=256, D_k=3:  1/256 + 1/9 ≈ 1/8.6  →  8.6× fewer computations</div>
+    <h3 class="sec-h">Scaling Multipliers</h3>
+    <ul class="sec-ul">
+      <li><strong>Width multiplier α ∈ (0,1]:</strong> Uniformly thins all layers — α=0.75 gives 75% channels everywhere. FLOPs reduce by α²</li>
+      <li><strong>Resolution multiplier ρ:</strong> Reduces input image resolution (224→192→160→128). FLOPs reduce by ρ²</li>
+      <li><strong>Combined:</strong> α=0.5, ρ=0.5 → 4× fewer parameters AND 4× fewer FLOPs → 16× total reduction</li>
+      <li><strong>ReLU6:</strong> Clips activation at 6, enabling fixed-point (int8) quantization without saturation issues</li>
+    </ul>
+  </div>
+  <div id="mobilenet-demo" class="section">
+    <div class="demo-wrap">
+      <div class="demo-title">Parameter Comparison — Standard vs Depthwise Separable</div>
+      <div class="demo-sub">Adjust the sliders to see the exact parameter counts for both convolution types.</div>
+      <div class="ctrl-grid3">
+        <div>
+          <div class="label-row"><span>Input channels C_in</span><span class="ctrl-val" id="mn-ci-v">3</span></div>
+          <input type="range" id="mn-ci" min="1" max="64" value="3" oninput="mnUpdate()">
+        </div>
+        <div>
+          <div class="label-row"><span>Output channels C_out</span><span class="ctrl-val" id="mn-co-v">32</span></div>
+          <input type="range" id="mn-co" min="1" max="256" value="32" oninput="mnUpdate()">
+        </div>
+        <div>
+          <div class="label-row"><span>Kernel size k</span><span class="ctrl-val" id="mn-k-v">3×3</span></div>
+          <input type="range" id="mn-k" min="1" max="3" step="1" value="2" oninput="mnUpdate()">
+        </div>
+      </div>
+      <div id="mn-diagram"></div>
+    </div>
+  </div>
+  <div id="mobilenet-results" class="section">
+    <div class="tbl-wrap"><table>
+      <tr><th>Model</th><th>Top-1 (ImageNet)</th><th>Mult-Adds</th><th>Params</th></tr>
+      <tr><td>VGG-16</td><td>71.5%</td><td>15,300M</td><td>138M</td></tr>
+      <tr><td>MobileNet 1.0×</td><td>70.6%</td><td>569M</td><td>4.2M</td></tr>
+      <tr><td>MobileNet 0.75×</td><td>68.4%</td><td>325M</td><td>2.6M</td></tr>
+      <tr><td>MobileNet 0.5×</td><td>63.7%</td><td>149M</td><td>1.3M</td></tr>
+    </table></div>
+    <div class="callout callout-green">Near-VGG-16 accuracy with 33× fewer parameters and 27× fewer FLOPs. This is the trade-off curve that made edge AI practical.</div>
+  </div>
+  <div id="mobilenet-reflection" class="section">
+    <ul class="sec-ul">
+      <li>Depthwise conv is memory-access bound, not compute bound — doesn't fully use GPU tensor cores (fixed in MobileNetV2+)</li>
+      <li>ReLU in depthwise bottleneck can destroy information in low-dimensional spaces (addressed in V2 with linear bottleneck)</li>
+      <li>Width multiplier requires retraining from scratch at each α — no zero-shot scaling</li>
+    </ul>
+    <div class="callout callout-blue">MobileNet pioneered deployment-aware design. Every efficient architecture since — MobileNetV2/V3, EfficientNet, ShuffleNet — builds on the depthwise separable factorisation.</div>
+  </div>
+  <div id="mobilenet-refs" class="section">
+    <div class="ref-item"><span class="ref-num">[1]</span> Howard, A. G., Zhu, M., Chen, B., Kalenichenko, D., Wang, W., Weyand, T., ... &amp; Adam, H. (2017). MobileNets: Efficient convolutional neural networks for mobile vision applications. arXiv:1704.04861</div>
+    <div class="ref-item"><span class="ref-num">[2]</span> Sandler, M., Howard, A., Zhu, M., Zhmoginov, A., &amp; Chen, L. C. (2018). MobileNetV2: Inverted residuals and linear bottlenecks. <em>CVPR 2018</em>. arXiv:1801.04381</div>
+  </div>
+</div>
+
+<!-- ═══════════════ SQUEEZENET ═══════════════ -->
+<div id="page-squeezenet" class="arch-page" style="display:none">
+  <div class="page-header">
+    <div class="arch-name">SqueezeNet</div>
+    <div class="arch-meta">
+      <span class="badge badge-blue">T-04</span>
+      <span class="badge badge-green">Iandola et al., 2016</span>
+    </div>
+    <div class="arch-tagline">AlexNet-level accuracy with 50× fewer parameters</div>
+  </div>
+  <div class="tab-bar">
+    <button class="tab-btn active" onclick="showTab('squeezenet','motivation',this)">Motivation</button>
+    <button class="tab-btn" onclick="showTab('squeezenet','architecture',this)">Architecture</button>
+    <button class="tab-btn" onclick="showTab('squeezenet','demo',this)">Interactive Demo</button>
+    <button class="tab-btn" onclick="showTab('squeezenet','results',this)">Results &amp; Impact</button>
+    <button class="tab-btn" onclick="showTab('squeezenet','reflection',this)">Reflection</button>
+    <button class="tab-btn" onclick="showTab('squeezenet','refs',this)">References</button>
+  </div>
+  <div id="squeezenet-motivation" class="section active">
+    <p class="prose">AlexNet won ImageNet 2012 with 240MB of weights. Distributing, storing, and updating models this large is impractical — for embedded deployment, OTA model updates, or FPGA deployment. SqueezeNet's explicit goal: AlexNet-level accuracy in under 1MB, designed small from scratch.</p>
+    <h3 class="sec-h">Three Design Strategies</h3>
+    <ul class="sec-ul">
+      <li><strong>Strategy 1:</strong> Replace 3×3 filters with 1×1 filters wherever possible (9× fewer parameters per filter)</li>
+      <li><strong>Strategy 2:</strong> Reduce the number of input channels to 3×3 filters using a "squeeze" layer before them</li>
+      <li><strong>Strategy 3:</strong> Downsample late — keep large spatial feature maps longer to preserve information</li>
+    </ul>
+    <div class="callout callout-blue">All three strategies reduce parameters without reducing accuracy. Strategy 1+2 directly reduce parameter count. Strategy 3 compensates for the lost expressiveness by keeping feature maps large longer.</div>
+  </div>
+  <div id="squeezenet-architecture" class="section">
+    <p class="prose">The Fire module is SqueezeNet's core. It has two stages: squeeze (1×1 only) then expand (parallel 1×1 and 3×3). The squeeze reduces channels cheaply before the expensive 3×3 expand operation.</p>
+    <div class="formula">Fire Module:
+  Input: M channels
+  → Squeeze:  1×1 conv → s₁ channels    (s₁ < M, typically s₁=16)
+  → Expand A: 1×1 conv → e₁ channels    ↗ in parallel
+  → Expand B: 3×3 conv → e₃ channels    ↘ concat
+  → Output: e₁ + e₃ channels            (typically e₁=e₃=64 → 128ch out)
+
+  Parameter count:
+    Squeeze:  M × s₁
+    Expand A: s₁ × e₁
+    Expand B: s₁ × 9 × e₃
+    Total:    M·s₁ + s₁·e₁ + 9·s₁·e₃</div>
+    <h3 class="sec-h">Full Architecture</h3>
+    <ul class="sec-ul">
+      <li>conv1 (96 filters, 7×7, stride 2) → maxpool → 8× Fire modules → conv10 (1000 filters, 1×1) → avg pool → softmax</li>
+      <li>No fully-connected layers — FC layers are traditionally 90% of VGG's parameters</li>
+      <li>SqueezeNet + Deep Compression (Han et al.) → 0.47MB (510× smaller than AlexNet)</li>
+    </ul>
+  </div>
+  <div id="squeezenet-demo" class="section">
+    <div class="demo-wrap">
+      <div class="demo-title">Fire Module — Interactive Parameter Calculator</div>
+      <div class="demo-sub">Adjust squeeze and expand settings. Watch how reducing s₁ before 3×3 expand saves parameters.</div>
+      <div class="ctrl-grid">
+        <div>
+          <div class="label-row"><span>Input channels M</span><span class="ctrl-val" id="sq-M-v">256</span></div>
+          <input type="range" id="sq-M" min="16" max="512" step="16" value="256" oninput="sqUpdate()">
+        </div>
+        <div>
+          <div class="label-row"><span>Squeeze s₁ (1×1 filters)</span><span class="ctrl-val" id="sq-s1-v">16</span></div>
+          <input type="range" id="sq-s1" min="1" max="64" step="1" value="16" oninput="sqUpdate()">
+        </div>
+        <div>
+          <div class="label-row"><span>Expand e₁ (1×1 filters)</span><span class="ctrl-val" id="sq-e1-v">64</span></div>
+          <input type="range" id="sq-e1" min="1" max="128" step="1" value="64" oninput="sqUpdate()">
+        </div>
+        <div>
+          <div class="label-row"><span>Expand e₃ (3×3 filters)</span><span class="ctrl-val" id="sq-e3-v">64</span></div>
+          <input type="range" id="sq-e3" min="1" max="128" step="1" value="64" oninput="sqUpdate()">
+        </div>
+      </div>
+      <div id="sq-diagram"></div>
+    </div>
+  </div>
+  <div id="squeezenet-results" class="section">
+    <div class="tbl-wrap"><table>
+      <tr><th>Model</th><th>Top-1</th><th>Top-5</th><th>Model Size</th></tr>
+      <tr><td>AlexNet</td><td>57.2%</td><td>80.3%</td><td>240MB</td></tr>
+      <tr><td>SqueezeNet</td><td>57.5%</td><td>80.3%</td><td>4.8MB</td></tr>
+      <tr><td>SqueezeNet (SVD compressed)</td><td>56.0%</td><td>79.4%</td><td>1.2MB</td></tr>
+      <tr><td>SqueezeNet + Deep Compression</td><td>57.5%</td><td>80.3%</td><td>0.47MB</td></tr>
+    </table></div>
+    <div class="callout callout-green">0.47MB vs 240MB for equivalent accuracy. This proved that extreme model compression is possible without accuracy loss — a landmark result for embedded AI.</div>
+  </div>
+  <div id="squeezenet-reflection" class="section">
+    <ul class="sec-ul">
+      <li>Accuracy ceiling is limited (57% top-1) compared to modern architectures</li>
+      <li>Fire modules are less hardware-efficient than depthwise separable convolutions</li>
+      <li>Deep Compression results don't translate to actual speedup on most hardware (sparse compute is hard)</li>
+    </ul>
+    <div class="callout callout-amber">SqueezeNet's lasting contribution: the squeeze layer — reducing channels before expensive 3×3 convolutions. This idea directly inspired MobileNet's pointwise conv placement and EfficientNet's bottleneck design.</div>
+  </div>
+  <div id="squeezenet-refs" class="section">
+    <div class="ref-item"><span class="ref-num">[1]</span> Iandola, F. N., Han, S., Moskewicz, M. W., Ashraf, K., Dally, W. J., &amp; Keutzer, K. (2016). SqueezeNet: AlexNet-level accuracy with 50x fewer parameters and less than 0.5MB model size. arXiv:1602.07360</div>
+    <div class="ref-item"><span class="ref-num">[2]</span> Han, S., Mao, H., &amp; Dally, W. J. (2016). Deep compression: Compressing deep neural networks with pruning, trained quantization and Huffman coding. <em>ICLR 2016</em>. arXiv:1510.00149</div>
+  </div>
+</div>
+
+<!-- ═══════════════ EFFICIENTNET ═══════════════ -->
+<div id="page-efficientnet" class="arch-page" style="display:none">
+  <div class="page-header">
+    <div class="arch-name">EfficientNet</div>
+    <div class="arch-meta">
+      <span class="badge badge-blue">T-05</span>
+      <span class="badge badge-green">Tan &amp; Le, ICML 2019</span>
+    </div>
+    <div class="arch-tagline">Rethinking Model Scaling for Convolutional Neural Networks</div>
+  </div>
+  <div class="tab-bar">
+    <button class="tab-btn active" onclick="showTab('efficientnet','motivation',this)">Motivation</button>
+    <button class="tab-btn" onclick="showTab('efficientnet','architecture',this)">Architecture</button>
+    <button class="tab-btn" onclick="showTab('efficientnet','demo',this)">Interactive Demo</button>
+    <button class="tab-btn" onclick="showTab('efficientnet','results',this)">Results &amp; Impact</button>
+    <button class="tab-btn" onclick="showTab('efficientnet','reflection',this)">Reflection</button>
+    <button class="tab-btn" onclick="showTab('efficientnet','refs',this)">References</button>
+  </div>
+  <div id="efficientnet-motivation" class="section active">
+    <p class="prose">When you want a more powerful CNN, how do you grow it? Previous work scaled one dimension at a time: ResNet goes deeper, WideResNet goes wider, higher-resolution inputs add resolution. But these dimensions interact — more depth only helps if the resolution is high enough to provide fine-grained spatial information, and width only helps if there are enough layers to combine the extra channels.</p>
+    <div class="callout callout-blue"><strong>Key question:</strong> Is there a principled way to scale all three dimensions (depth, width, resolution) simultaneously? EfficientNet's answer: yes — balance them with a single compound coefficient φ, grid-searched under a fixed FLOP constraint.</div>
+  </div>
+  <div id="efficientnet-architecture" class="section">
+    <div class="formula">Compound scaling:
+  Depth:       d = α^φ    (α = 1.2)
+  Width:       w = β^φ    (β = 1.1)
+  Resolution:  r = γ^φ    (γ = 1.15)
+
+Constraint:   α · β² · γ² ≈ 2
+  (doubling φ by 1 ≈ doubles FLOPs)
+
+EfficientNet-B0 (φ=1): 224px, 5.3M params, 77.1% top-1
+EfficientNet-B7 (φ=8): 600px, 66M params,  84.3% top-1</div>
+    <h3 class="sec-h">Baseline (B0) Architecture</h3>
+    <ul class="sec-ul">
+      <li>Found via NAS — uses MBConv blocks (inverted residual from MobileNetV2)</li>
+      <li>Squeeze-and-Excitation (SE) blocks after each MBConv for channel attention</li>
+      <li>Swish activation: x·σ(x) — smooth, differentiable, outperforms ReLU on deep nets</li>
+      <li>B0 baseline: 9 stage types, each stage repeated some number of times</li>
+    </ul>
+  </div>
+  <div id="efficientnet-demo" class="section">
+    <div class="demo-wrap">
+      <div class="demo-title">Compound Scaling — drag to scale B0 → B7</div>
+      <div class="demo-sub">All three dimensions scale together. Watch how accuracy and params grow with φ.</div>
+      <div class="label-row"><span>EfficientNet variant</span><span class="ctrl-val" id="eff-v">B0</span></div>
+      <input type="range" id="eff-phi" min="0" max="7" step="1" value="0" oninput="effUpdate()">
+      <div style="display:flex;justify-content:space-between;font-size:10px;color:var(--text3);margin-bottom:12px">
+        <span>B0</span><span>B1</span><span>B2</span><span>B3</span><span>B4</span><span>B5</span><span>B6</span><span>B7</span>
+      </div>
+      <div id="eff-diagram"></div>
+    </div>
+  </div>
+  <div id="efficientnet-results" class="section">
+    <div class="tbl-wrap"><table>
+      <tr><th>Model</th><th>Top-1</th><th>Params</th><th>FLOPs</th></tr>
+      <tr><td>ResNet-152</td><td>77.8%</td><td>60M</td><td>11.3B</td></tr>
+      <tr><td>EfficientNet-B0</td><td>77.1%</td><td>5.3M</td><td>0.39B</td></tr>
+      <tr><td>EfficientNet-B4</td><td>82.9%</td><td>19M</td><td>4.2B</td></tr>
+      <tr><td>EfficientNet-B7</td><td>84.3%</td><td>66M</td><td>37B</td></tr>
+    </table></div>
+    <div class="callout callout-green">B0 matches ResNet-152 accuracy with 11× fewer parameters and 29× fewer FLOPs. B7 was state-of-the-art on ImageNet at release, surpassing prior best (GPipe) with 8.4× fewer parameters.</div>
+  </div>
+  <div id="efficientnet-reflection" class="section">
+    <ul class="sec-ul">
+      <li>Compound scaling assumes the best α,β,γ ratio is fixed regardless of φ — empirically this works but is not theoretically guaranteed</li>
+      <li>NAS-derived B0 baseline makes the scaling family hardware-specific</li>
+      <li>Very sensitive to training recipe — FixEfficientNet, AdvProp, and Noisy Student each improved accuracy significantly</li>
+      <li>Vision Transformers later surpassed EfficientNet at large scale (ViT-G, CoAtNet)</li>
+    </ul>
+    <div class="callout callout-blue">Compound scaling is a meta-principle applicable beyond CNNs: when scaling correlated dimensions of any system, scaling them proportionally outperforms scaling any single dimension alone.</div>
+  </div>
+  <div id="efficientnet-refs" class="section">
+    <div class="ref-item"><span class="ref-num">[1]</span> Tan, M., &amp; Le, Q. (2019). EfficientNet: Rethinking model scaling for convolutional neural networks. <em>ICML 2019</em>. arXiv:1905.11946</div>
+    <div class="ref-item"><span class="ref-num">[2]</span> Tan, M., &amp; Le, Q. (2021). EfficientNetV2: Smaller models and faster training. <em>ICML 2021</em>. arXiv:2104.00298</div>
+    <div class="ref-item"><span class="ref-num">[3]</span> Zoph, B., Ghiasi, G., Lin, T. Y., Cui, Y., Liu, H., Cubuk, E. D., &amp; Le, Q. V. (2020). Rethinking pre-training and self-training. <em>NeurIPS 2020</em>. arXiv:2006.06882</div>
+  </div>
+</div>
+
+<!-- ═══════════════ RESNEXT ═══════════════ -->
+<div id="page-resnext" class="arch-page" style="display:none">
+  <div class="page-header">
+    <div class="arch-name">ResNeXt</div>
+    <div class="arch-meta">
+      <span class="badge badge-blue">T-06</span>
+      <span class="badge badge-green">Xie et al., CVPR 2017</span>
+    </div>
+    <div class="arch-tagline">Aggregated Residual Transformations for Deep Neural Networks</div>
+  </div>
+  <div class="tab-bar">
+    <button class="tab-btn active" onclick="showTab('resnext','motivation',this)">Motivation</button>
+    <button class="tab-btn" onclick="showTab('resnext','architecture',this)">Architecture</button>
+    <button class="tab-btn" onclick="showTab('resnext','demo',this)">Interactive Demo</button>
+    <button class="tab-btn" onclick="showTab('resnext','results',this)">Results &amp; Impact</button>
+    <button class="tab-btn" onclick="showTab('resnext','reflection',this)">Reflection</button>
+    <button class="tab-btn" onclick="showTab('resnext','refs',this)">References</button>
+  </div>
+  <div id="resnext-motivation" class="section active">
+    <p class="prose">Post-ResNet, the obvious scaling paths were deeper (more layers) or wider (more channels). Both work, but have diminishing returns and increase design complexity. ResNeXt introduces a third dimension: cardinality — the number of parallel transformation paths inside each residual block.</p>
+    <div class="callout callout-blue"><strong>Empirical finding:</strong> Increasing cardinality from 1 to 32 (same total FLOPs) improves ImageNet accuracy more than doubling depth or width. Cardinality is a more effective scaling dimension than either depth or width.</div>
+    <ul class="sec-ul">
+      <li>Inception showed multiple parallel paths can be effective, but required hand-tuned topology per block</li>
+      <li>ResNeXt makes it uniform: every block has the same cardinality C, each path is identical</li>
+      <li>Grouped convolutions (used in AlexNet for multi-GPU) repurposed as an expressiveness tool</li>
+    </ul>
+  </div>
+  <div id="resnext-architecture" class="section">
+    <div class="formula">ResNeXt-50 32×4d:  C=32 groups, d=4 channels wide per group
+
+Standard ResNet-50 bottleneck:
+  256ch → 64ch (1×1) → 64ch (3×3) → 256ch (1×1)
+
+ResNeXt-50 block (equivalent FLOPs):
+  256ch → 128ch (1×1) → 128ch grouped-3×3, C=32 → 256ch (1×1)
+  Each group processes 4 channels independently
+
+Three equivalent formulations:
+  (a) C separate branches: each 256 → 4 → 4 → 256, results summed
+  (b) Concat: group outputs concatenated, then 1×1 combined
+  (c) Grouped conv: single op with groups=C  ← most efficient in practice</div>
+    <ul class="sec-ul">
+      <li>Aggregated transformations: output is the sum of C parallel transformations (not concat)</li>
+      <li>Simple rule: keep total FLOPs equal to ResNet baseline — just distribute them across C groups</li>
+      <li>Grouped conv in PyTorch: <code style="font-family:var(--mono);font-size:12px">nn.Conv2d(in, out, 3, groups=C)</code></li>
+    </ul>
+  </div>
+  <div id="resnext-demo" class="section">
+    <div class="demo-wrap">
+      <div class="demo-title">Grouped Convolution — Cardinality Visualiser</div>
+      <div class="demo-sub">See how channels split into parallel groups. Same total channels, but each group is narrower and more specialised.</div>
+      <div class="ctrl-grid">
+        <div>
+          <div class="label-row"><span>Input/Output channels</span><span class="ctrl-val" id="rx2-ch-v">128</span></div>
+          <input type="range" id="rx2-ch" min="8" max="256" step="8" value="128" oninput="rx2Update()">
+        </div>
+        <div>
+          <div class="label-row"><span>Cardinality C (groups)</span><span class="ctrl-val" id="rx2-c-v">4</span></div>
+          <input type="range" id="rx2-c" min="1" max="16" step="1" value="4" oninput="rx2Update()">
+        </div>
+      </div>
+      <div id="rx2-diagram"></div>
+    </div>
+  </div>
+  <div id="resnext-results" class="section">
+    <div class="tbl-wrap"><table>
+      <tr><th>Model</th><th>Top-1</th><th>Top-5</th><th>Params</th><th>FLOPs</th></tr>
+      <tr><td>ResNet-50</td><td>75.3%</td><td>92.2%</td><td>25M</td><td>4.1B</td></tr>
+      <tr><td>ResNeXt-50 32×4d</td><td>77.8%</td><td>94.0%</td><td>25M</td><td>4.2B</td></tr>
+      <tr><td>ResNet-101</td><td>76.4%</td><td>92.9%</td><td>44M</td><td>7.8B</td></tr>
+      <tr><td>ResNeXt-101 32×4d</td><td>78.8%</td><td>94.5%</td><td>44M</td><td>8.0B</td></tr>
+    </table></div>
+    <div class="callout callout-green">+2.4% top-1 over ResNet-101 at essentially identical parameters and FLOPs. The only architectural change: grouped convolutions with C=32.</div>
+  </div>
+  <div id="resnext-reflection" class="section">
+    <ul class="sec-ul">
+      <li>Grouped convolutions have no cross-group communication within a layer — ShuffleNet directly solves this</li>
+      <li>Hardware alignment: grouped convs need channel counts divisible by groups for optimal GPU performance</li>
+      <li>Multi-head attention in Transformers is essentially cardinality applied to attention — ResNeXt's idea generalised</li>
+    </ul>
+    <div class="callout callout-amber">Cardinality-as-dimension is a powerful design insight. It generalised beyond CNNs: the "multi-head" pattern in attention mechanisms is the same idea — C parallel transformations aggregated by summation or concatenation.</div>
+  </div>
+  <div id="resnext-refs" class="section">
+    <div class="ref-item"><span class="ref-num">[1]</span> Xie, S., Girshick, R., Dollár, P., Tu, Z., &amp; He, K. (2017). Aggregated residual transformations for deep neural networks. <em>CVPR 2017</em>. arXiv:1611.05431</div>
+    <div class="ref-item"><span class="ref-num">[2]</span> Krizhevsky, A., Sutskever, I., &amp; Hinton, G. E. (2012). ImageNet classification with deep convolutional neural networks. <em>NeurIPS 2012</em>. (AlexNet, introduced grouped conv)</div>
+  </div>
+</div>
+
+<!-- ═══════════════ SHUFFLENET ═══════════════ -->
+<div id="page-shufflenet" class="arch-page" style="display:none">
+  <div class="page-header">
+    <div class="arch-name">ShuffleNet</div>
+    <div class="arch-meta">
+      <span class="badge badge-blue">T-07</span>
+      <span class="badge badge-green">Zhang et al., CVPR 2018</span>
+    </div>
+    <div class="arch-tagline">Channel Shuffle for Group Convolution</div>
+  </div>
+  <div class="tab-bar">
+    <button class="tab-btn active" onclick="showTab('shufflenet','motivation',this)">Motivation</button>
+    <button class="tab-btn" onclick="showTab('shufflenet','architecture',this)">Architecture</button>
+    <button class="tab-btn" onclick="showTab('shufflenet','demo',this)">Interactive Demo</button>
+    <button class="tab-btn" onclick="showTab('shufflenet','results',this)">Results &amp; Impact</button>
+    <button class="tab-btn" onclick="showTab('shufflenet','reflection',this)">Reflection</button>
+    <button class="tab-btn" onclick="showTab('shufflenet','refs',this)">References</button>
+  </div>
+  <div id="shufflenet-motivation" class="section active">
+    <p class="prose">MobileNet's depthwise separable convolutions are efficient, but the 1×1 pointwise convolution still dominates the computation budget at small channel counts. Replacing 1×1 with grouped convolution saves FLOPs, but creates a silo problem: groups cannot see each other's features.</p>
+    <ul class="sec-ul">
+      <li>In grouped conv, group 1's output only depends on group 1's input</li>
+      <li>Stacking grouped convolutions: information stays permanently siloed in its original group</li>
+      <li>The network loses the ability to learn cross-group feature combinations</li>
+    </ul>
+    <div class="callout callout-blue"><strong>ShuffleNet's solution:</strong> Channel Shuffle — a zero-parameter operation that redistributes channels between groups after each grouped conv. Now every group's input contains one channel from every original group, restoring full cross-group mixing.</div>
+  </div>
+  <div id="shufflenet-architecture" class="section">
+    <div class="formula">Channel Shuffle (g groups, n total channels):
+  1. Reshape:    (N, C, H, W) → (N, g, C/g, H, W)
+  2. Transpose:  (N, g, C/g, H, W) → (N, C/g, g, H, W)
+  3. Flatten:    (N, C/g, g, H, W) → (N, C, H, W)
+
+Effect: channel i in group j maps to channel j in group i
+→ Each output position receives 1 channel from each original group
+
+ShuffleNet Unit:
+  Input → GConv 1×1 → Channel Shuffle → DWConv 3×3 → GConv 1×1 → Add skip</div>
+    <ul class="sec-ul">
+      <li>Groups g=3 or 8 commonly used — larger g means each group is narrower (cheaper)</li>
+      <li>Downsampling unit: stride-2 DWConv + avg-pool on skip → concatenate instead of add (wider output)</li>
+      <li>ShuffleNet v2 (2018): adds channel split before + concat after — eliminates element-wise add overhead</li>
+    </ul>
+  </div>
+  <div id="shufflenet-demo" class="section">
+    <div class="demo-wrap">
+      <div class="demo-title">Channel Shuffle — Animated</div>
+      <div class="demo-sub">Watch how channels redistribute between groups. Each output position gets one channel from each original group.</div>
+      <div class="ctrl-grid">
+        <div>
+          <div class="label-row"><span>Groups g</span><span class="ctrl-val" id="sf-g-v">3</span></div>
+          <input type="range" id="sf-g" min="2" max="6" step="1" value="3" oninput="sfUpdate()">
+        </div>
+        <div>
+          <div class="label-row"><span>Channels per group n/g</span><span class="ctrl-val" id="sf-n-v">2</span></div>
+          <input type="range" id="sf-n" min="1" max="4" step="1" value="2" oninput="sfUpdate()">
+        </div>
+      </div>
+      <div class="btn-group">
+        <button class="btn" onclick="sfAnimate()">▶ Shuffle</button>
+        <button class="btn" onclick="sfReset()">↺ Reset</button>
+      </div>
+      <div id="sf-diagram"></div>
+    </div>
+  </div>
+  <div id="shufflenet-results" class="section">
+    <div class="tbl-wrap"><table>
+      <tr><th>Model</th><th>Top-1</th><th>Mult-Adds</th><th>vs MobileNet</th></tr>
+      <tr><td>MobileNet 1×</td><td>70.6%</td><td>569M</td><td>—</td></tr>
+      <tr><td>ShuffleNet 2× (g=3)</td><td>70.9%</td><td>524M</td><td>+0.3% acc, −8% FLOPs</td></tr>
+      <tr><td>ShuffleNet 1× (g=3)</td><td>65.9%</td><td>140M</td><td>13× faster than AlexNet</td></tr>
+      <tr><td>ShuffleNet v2 1×</td><td>69.4%</td><td>146M</td><td>Higher practical speed</td></tr>
+    </table></div>
+  </div>
+  <div id="shufflenet-reflection" class="section">
+    <ul class="sec-ul">
+      <li>Channel shuffle requires reshape + transpose — memory access pattern can be cache-unfriendly</li>
+      <li>ShuffleNet v2 paper's key insight: FLOPs alone don't predict inference speed — memory access cost, parallelism, and platform matter equally</li>
+      <li>Equal channel width (v2 insight) reduces memory access cost more than shuffle itself</li>
+    </ul>
+    <div class="callout callout-amber">ShuffleNet v2 established that practical efficiency metrics (latency on device) should replace theoretical metrics (FLOPs) as the design target. This shifted how efficient CNN research is evaluated.</div>
+  </div>
+  <div id="shufflenet-refs" class="section">
+    <div class="ref-item"><span class="ref-num">[1]</span> Zhang, X., Zhou, X., Lin, M., &amp; Sun, J. (2018). ShuffleNet: An extremely efficient convolutional neural network for mobile devices. <em>CVPR 2018</em>. arXiv:1707.01083</div>
+    <div class="ref-item"><span class="ref-num">[2]</span> Ma, N., Zhang, X., Zheng, H. T., &amp; Sun, J. (2018). ShuffleNet V2: Practical guidelines for efficient CNN architecture design. <em>ECCV 2018</em>. arXiv:1807.11164</div>
+  </div>
+</div>
+
+<!-- ═══════════════ XCEPTION ═══════════════ -->
+<div id="page-xception" class="arch-page" style="display:none">
+  <div class="page-header">
+    <div class="arch-name">Xception</div>
+    <div class="arch-meta">
+      <span class="badge badge-blue">T-08</span>
+      <span class="badge badge-green">Chollet, CVPR 2017</span>
+    </div>
+    <div class="arch-tagline">Extreme Inception — depthwise separable as the logical limit of Inception</div>
+  </div>
+  <div class="tab-bar">
+    <button class="tab-btn active" onclick="showTab('xception','motivation',this)">Motivation</button>
+    <button class="tab-btn" onclick="showTab('xception','architecture',this)">Architecture</button>
+    <button class="tab-btn" onclick="showTab('xception','demo',this)">Interactive Demo</button>
+    <button class="tab-btn" onclick="showTab('xception','results',this)">Results &amp; Impact</button>
+    <button class="tab-btn" onclick="showTab('xception','reflection',this)">Reflection</button>
+    <button class="tab-btn" onclick="showTab('xception','refs',this)">References</button>
+  </div>
+  <div id="xception-motivation" class="section active">
+    <p class="prose">The Inception architecture used multiple parallel branches (1×1, 3×3, 5×5 filters) to capture patterns at different scales. Each branch still mixed channel and spatial dimensions within it. Chollet's question: what if we push this decomposition to its logical extreme?</p>
+    <div class="callout callout-blue"><strong>Inception hypothesis:</strong> Cross-channel correlations and spatial correlations can be mapped completely separately. A standard Inception module partially decouples them. Xception (Extreme Inception) fully decouples: one operation purely spatial, one purely cross-channel.</div>
+    <p class="prose">The result is mathematically equivalent to a depthwise separable convolution — but arrived at from a completely different theoretical direction than MobileNet.</p>
+  </div>
+  <div id="xception-architecture" class="section">
+    <div class="formula">Standard Inception branch:
+  conv (mixes channels AND spatial simultaneously)
+
+Xception path:
+  1×1 conv (cross-channel only, no spatial mixing)
+  → 3×3 depthwise (spatial only, per-channel, no cross-channel)
+
+vs MobileNet order:
+  3×3 depthwise → 1×1 pointwise   (spatial first, then channel)
+  Xception:
+  1×1 pointwise → 3×3 depthwise   (channel first, then spatial)
+
+Key difference from MobileNet:
+  No ReLU between pointwise and depthwise (empirically better for Xception)</div>
+    <h3 class="sec-h">Architecture Flow</h3>
+    <ul class="sec-ul">
+      <li><strong>Entry flow:</strong> 4 depthwise sep blocks, channels 64→128→256→728 with residual connections</li>
+      <li><strong>Middle flow:</strong> 8× identical 728-channel residual blocks (no downsampling)</li>
+      <li><strong>Exit flow:</strong> 1024 → sep(1536) → sep(2048) → global avg pool → dense → softmax</li>
+      <li>Total: 36 depthwise separable conv layers, all with residual connections</li>
+    </ul>
+  </div>
+  <div id="xception-demo" class="section">
+    <div class="demo-wrap">
+      <div class="demo-title">Inception → Xception Conceptual Evolution</div>
+      <div class="demo-sub">Click each step to see how Inception progressively becomes Xception through principled simplification.</div>
+      <div class="btn-group">
+        <button class="btn" onclick="xcStep(0)">Step 1: Inception</button>
+        <button class="btn" onclick="xcStep(1)">Step 2: Simplify</button>
+        <button class="btn" onclick="xcStep(2)">Step 3: Extreme</button>
+        <button class="btn" onclick="xcStep(3)">= Xception</button>
+      </div>
+      <div id="xc-diagram"></div>
+    </div>
+    <div class="demo-wrap" style="margin-top:16px">
+      <div class="demo-title">Depthwise Separable Parameter Calculator</div>
+      <div class="ctrl-grid">
+        <div>
+          <div class="label-row"><span>Channels C</span><span class="ctrl-val" id="xc-c-v">256</span></div>
+          <input type="range" id="xc-c" min="16" max="512" step="16" value="256" oninput="xcCalc()">
+        </div>
+        <div>
+          <div class="label-row"><span>Output channels C_out</span><span class="ctrl-val" id="xc-co-v">256</span></div>
+          <input type="range" id="xc-co" min="16" max="512" step="16" value="256" oninput="xcCalc()">
+        </div>
+      </div>
+      <div id="xc-calc"></div>
+    </div>
+  </div>
+  <div id="xception-results" class="section">
+    <div class="tbl-wrap"><table>
+      <tr><th>Model</th><th>Top-1</th><th>Top-5</th><th>Params</th></tr>
+      <tr><td>Inception-V3</td><td>78.8%</td><td>94.4%</td><td>23.8M</td></tr>
+      <tr><td>Xception</td><td>79.0%</td><td>94.5%</td><td>22.9M</td></tr>
+      <tr><td>ResNet-50</td><td>75.3%</td><td>92.2%</td><td>25.6M</td></tr>
+    </table></div>
+    <div class="callout callout-green">Xception matches Inception-V3 accuracy with fewer parameters. On the larger JFT-300M internal Google dataset, Xception gains are more significant — suggesting the advantage grows with data scale.</div>
+  </div>
+  <div id="xception-reflection" class="section">
+    <ul class="sec-ul">
+      <li>Order difference from MobileNet (pointwise→depthwise vs depthwise→pointwise) has marginal accuracy impact</li>
+      <li>No intermediate ReLU between pointwise and depthwise was counter-intuitive but empirically validated</li>
+      <li>Xception backbone widely adopted: used in DeepLabV3+, Keras Applications API</li>
+    </ul>
+    <div class="callout callout-amber">Xception's main contribution is the theoretical bridge: it unified the MobileNet (efficiency) and Inception (multi-scale) design families under one framework. Depthwise separable conv is not a heuristic trick — it's the mathematically principled limit of Inception.</div>
+  </div>
+  <div id="xception-refs" class="section">
+    <div class="ref-item"><span class="ref-num">[1]</span> Chollet, F. (2017). Xception: Deep learning with depthwise separable convolutions. <em>CVPR 2017</em>. arXiv:1610.02357</div>
+    <div class="ref-item"><span class="ref-num">[2]</span> Szegedy, C., Vanhoucke, V., Ioffe, S., Shlens, J., &amp; Wojna, Z. (2016). Rethinking the inception architecture for computer vision. <em>CVPR 2016</em>. arXiv:1512.00567</div>
+  </div>
+</div>
+
+<!-- ═══════════════ NASNET ═══════════════ -->
+<div id="page-nasnet" class="arch-page" style="display:none">
+  <div class="page-header">
+    <div class="arch-name">NASNet</div>
+    <div class="arch-meta">
+      <span class="badge badge-blue">T-09</span>
+      <span class="badge badge-green">Zoph et al., CVPR 2018</span>
+    </div>
+    <div class="arch-tagline">Neural Architecture Search — machines design machines</div>
+  </div>
+  <div class="tab-bar">
+    <button class="tab-btn active" onclick="showTab('nasnet','motivation',this)">Motivation</button>
+    <button class="tab-btn" onclick="showTab('nasnet','architecture',this)">Architecture</button>
+    <button class="tab-btn" onclick="showTab('nasnet','demo',this)">Interactive Demo</button>
+    <button class="tab-btn" onclick="showTab('nasnet','results',this)">Results &amp; Impact</button>
+    <button class="tab-btn" onclick="showTab('nasnet','reflection',this)">Reflection</button>
+    <button class="tab-btn" onclick="showTab('nasnet','refs',this)">References</button>
+  </div>
+  <div id="nasnet-motivation" class="section active">
+    <p class="prose">All architectures so far — ResNet, MobileNet, DenseNet — were designed manually. An expert would propose a structure, train it, measure accuracy, and iterate. This process takes months and depends heavily on intuition. Neural Architecture Search asks: can we automate this with machine learning itself?</p>
+    <ul class="sec-ul">
+      <li>Search space: even with 10 layer types and 10 layers, there are 10¹⁰ possible architectures</li>
+      <li>Exhaustive search is completely infeasible — even one training run takes hours</li>
+      <li>NAS trains a controller RNN that generates architecture descriptions</li>
+      <li>The controller learns via Reinforcement Learning: good architectures (high val accuracy) get positive reward</li>
+    </ul>
+    <div class="callout callout-blue"><strong>NASNet innovation:</strong> Don't search full architectures. Search for a repeatable cell (Normal Cell + Reduction Cell), then stack it. This reduces the search space dramatically and enables transfer from cheap CIFAR-10 search to expensive ImageNet deployment.</div>
+  </div>
+  <div id="nasnet-architecture" class="section">
+    <div class="formula">Controller RNN generates a cell by predicting sequences:
+  For each of 5 blocks in a cell:
+    Hidden state 1:  one of {prev outputs, skip connections}
+    Operation 1:     one of {sep 3×3, sep 5×5, avg pool 3×3,
+                              max pool 3×3, identity, dilated 3×3,
+                              1×7 then 7×1, sep 7×7, ...}
+    Hidden state 2:  same choices
+    Operation 2:     same op choices
+    Combine:         add or concat
+
+Total: 5^(4×ops + 2×inputs) possibilities per cell
+Controller trained with REINFORCE on CIFAR-10 val accuracy</div>
+    <h3 class="sec-h">Deployment</h3>
+    <ul class="sec-ul">
+      <li>Search ran on 500 GPUs for 4 days (≈2000 GPU-days) on CIFAR-10</li>
+      <li>Best Normal Cell contains: sep 5×5, identity, avg pool 3×3, sep 3×3, max pool 3×3 operations</li>
+      <li>Stacking: stem conv → [N × Normal Cell] → [Reduction Cell] → repeat → classifier</li>
+      <li>N and initial channels are hyperparameters tuned to different compute budgets</li>
+    </ul>
+  </div>
+  <div id="nasnet-demo" class="section">
+    <div class="demo-wrap">
+      <div class="demo-title">NAS Search Process — Conceptual Simulation</div>
+      <div class="demo-sub">See how the controller iteratively finds better cell architectures through reward feedback.</div>
+      <div class="btn-group">
+        <button class="btn" onclick="nasRun()">▶ Simulate Search</button>
+        <button class="btn" onclick="nasReset()">↺ Reset</button>
+      </div>
+      <div id="nas-diagram"></div>
+    </div>
+  </div>
+  <div id="nasnet-results" class="section">
+    <div class="tbl-wrap"><table>
+      <tr><th>Model</th><th>Top-1</th><th>Top-5</th><th>Params</th><th>Search Cost</th></tr>
+      <tr><td>ResNet-152</td><td>76.4%</td><td>93.1%</td><td>60M</td><td>—</td></tr>
+      <tr><td>NASNet-A Mobile (4@1056)</td><td>74.0%</td><td>91.6%</td><td>5.3M</td><td>2000 GPU-days</td></tr>
+      <tr><td>NASNet-A Large (6@4032)</td><td>82.7%</td><td>96.2%</td><td>88.9M</td><td>2000 GPU-days</td></tr>
+      <tr><td>AmoebaNet-A</td><td>82.8%</td><td>96.1%</td><td>86.7M</td><td>3150 GPU-days</td></tr>
+    </table></div>
+    <div class="callout callout-green">NASNet-A Large achieves 82.7% top-1 — the best reported at the time, surpassing all human-designed architectures. NASNet-Mobile beats MobileNet by 3.4% top-1 at the same parameter count.</div>
+  </div>
+  <div id="nasnet-reflection" class="section">
+    <ul class="sec-ul">
+      <li>2000 GPU-days is accessible only to Google, Meta, and similar — democratisation remains a challenge</li>
+      <li>CIFAR-10 cells don't always transfer optimally to other tasks or datasets</li>
+      <li>Learned operations are hard to interpret — insights are not easily extractable</li>
+      <li>Later: DARTS (1 GPU-day), ENAS (0.45 GPU-days), One-Shot NAS — made NAS practical for labs</li>
+    </ul>
+    <div class="callout callout-blue">NASNet proved that AutoML can match and exceed human design. It shifted the field toward efficient search methods (weight sharing, differentiable NAS) that are now standard in industry pipelines.</div>
+  </div>
+  <div id="nasnet-refs" class="section">
+    <div class="ref-item"><span class="ref-num">[1]</span> Zoph, B., Vasudevan, V., Shlens, J., &amp; Le, Q. V. (2018). Learning transferable architectures for scalable image recognition. <em>CVPR 2018</em>. arXiv:1707.07012</div>
+    <div class="ref-item"><span class="ref-num">[2]</span> Liu, H., Simonyan, K., &amp; Yang, Y. (2019). DARTS: Differentiable architecture search. <em>ICLR 2019</em>. arXiv:1806.09055</div>
+    <div class="ref-item"><span class="ref-num">[3]</span> Real, E., Aggarwal, A., Huang, Y., &amp; Le, Q. V. (2019). Regularized evolution for image classifier architecture search. <em>AAAI 2019</em>. arXiv:1802.01548</div>
+  </div>
+</div>
+
+<!-- ═══════════════ MOBILENETV2 ═══════════════ -->
+<div id="page-mobilenetv2" class="arch-page" style="display:none">
+  <div class="page-header">
+    <div class="arch-name">MobileNetV2</div>
+    <div class="arch-meta">
+      <span class="badge badge-blue">T-10</span>
+      <span class="badge badge-green">Sandler et al., CVPR 2018</span>
+    </div>
+    <div class="arch-tagline">Inverted Residuals and Linear Bottlenecks</div>
+  </div>
+  <div class="tab-bar">
+    <button class="tab-btn active" onclick="showTab('mobilenetv2','motivation',this)">Motivation</button>
+    <button class="tab-btn" onclick="showTab('mobilenetv2','architecture',this)">Architecture</button>
+    <button class="tab-btn" onclick="showTab('mobilenetv2','demo',this)">Interactive Demo</button>
+    <button class="tab-btn" onclick="showTab('mobilenetv2','results',this)">Results &amp; Impact</button>
+    <button class="tab-btn" onclick="showTab('mobilenetv2','reflection',this)">Reflection</button>
+    <button class="tab-btn" onclick="showTab('mobilenetv2','refs',this)">References</button>
+  </div>
+  <div id="mobilenetv2-motivation" class="section active">
+    <p class="prose">MobileNetV1 worked, but applying ReLU inside the narrow bottleneck of a depthwise separable block caused information loss. Here's why: neural network feature maps typically lie on a low-dimensional manifold embedded in a high-dimensional space. ReLU is safe in high dimensions (zeroing some features doesn't collapse the manifold), but in low dimensions it crushes information irreversibly.</p>
+    <div class="callout callout-blue"><strong>Linear manifold hypothesis:</strong> Interesting activations lie on a low-dimensional manifold. If we project to a low-dimensional space and apply ReLU, we collapse the manifold — information is permanently lost. The fix: no activation (linear) at the narrow projection step.</div>
+    <ul class="sec-ul">
+      <li>ResNet: wide → narrow → wide. Narrows to reduce computation, expands to restore capacity</li>
+      <li>But: ReLU in the narrow space hurts. MobileNetV1 had ReLU everywhere</li>
+      <li>MobileNetV2 inverts the residual: narrow → wide → narrow. The wide intermediate space can safely apply ReLU. The narrow output uses no activation.</li>
+    </ul>
+  </div>
+  <div id="mobilenetv2-architecture" class="section">
+    <div class="formula">MBConv Block (Inverted Residual + Linear Bottleneck):
+  Input: n channels (narrow)
+  → 1×1 expand:    t×n channels   + ReLU6   (expand ratio t, typically 6)
+  → 3×3 depthwise: t×n channels   + ReLU6   (spatial transform)
+  → 1×1 project:   n' channels    NO activation ← linear bottleneck
+  → skip add (if stride=1 AND n == n')
+
+Params per block:
+  n × (t·n) + (t·n) × 9 + (t·n) × n'
+  For t=6, n=32, n'=32:
+    32×192 + 192×9 + 192×32 = 6144 + 1728 + 6144 = 14,016</div>
+    <h3 class="sec-h">Inverted vs Standard Residual</h3>
+    <div class="grid2">
+      <div class="stat-card">
+        <div class="label">ResNet bottleneck</div>
+        <div style="font-family:var(--mono);font-size:12px;line-height:2;color:var(--text2);margin-top:6px">
+          256ch (wide)<br>↓ 1×1 → 64ch (narrow)<br>↓ 3×3 conv + ReLU<br>↓ 1×1 → 256ch (wide)<br>Skip on WIDE side
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="label">MBConv (V2) — inverted</div>
+        <div style="font-family:var(--mono);font-size:12px;line-height:2;color:var(--green);margin-top:6px">
+          32ch (narrow)<br>↓ 1×1 → 192ch (wide)<br>↓ 3×3 DW + ReLU6<br>↓ 1×1 → 32ch (narrow) NO act<br>Skip on NARROW side
+        </div>
+      </div>
+    </div>
+  </div>
+  <div id="mobilenetv2-demo" class="section">
+    <div class="demo-wrap">
+      <div class="demo-title">MBConv Block — Animated Forward Pass</div>
+      <div class="demo-sub">Observe how the channel count expands, processes, then contracts. Notice where ReLU6 is applied (and crucially, where it's not).</div>
+      <div class="ctrl-grid">
+        <div>
+          <div class="label-row"><span>Input channels n</span><span class="ctrl-val" id="v2-n-v">32</span></div>
+          <input type="range" id="v2-n" min="8" max="96" step="8" value="32" oninput="v2Update()">
+        </div>
+        <div>
+          <div class="label-row"><span>Expansion ratio t</span><span class="ctrl-val" id="v2-t-v">6</span></div>
+          <input type="range" id="v2-t" min="1" max="8" step="1" value="6" oninput="v2Update()">
+        </div>
+      </div>
+      <div class="btn-group">
+        <button class="btn" onclick="v2Run()">▶ Run Forward Pass</button>
+        <button class="btn" onclick="v2Reset()">↺ Reset</button>
+      </div>
+      <div id="v2-diagram"></div>
+    </div>
+  </div>
+  <div id="mobilenetv2-results" class="section">
+    <div class="tbl-wrap"><table>
+      <tr><th>Model</th><th>Top-1</th><th>Mult-Adds</th><th>Params</th></tr>
+      <tr><td>MobileNetV1 1×</td><td>70.6%</td><td>569M</td><td>4.2M</td></tr>
+      <tr><td>MobileNetV2 1×</td><td>72.0%</td><td>300M</td><td>3.4M</td></tr>
+      <tr><td>MobileNetV2 1.4×</td><td>74.7%</td><td>585M</td><td>6.9M</td></tr>
+      <tr><td>ShuffleNet 1.5×</td><td>71.5%</td><td>292M</td><td>3.4M</td></tr>
+    </table></div>
+    <div class="callout callout-green">+1.4% top-1 accuracy over V1 at ~47% fewer multiply-adds. The linear bottleneck was ablated in the paper — removing it drops accuracy below MobileNetV1, confirming it's the critical innovation.</div>
+  </div>
+  <div id="mobilenetv2-reflection" class="section">
+    <ul class="sec-ul">
+      <li>Inverted residual + linear bottleneck (MBConv) became the standard block in EfficientNet, MobileNetV3, and most modern efficient architectures</li>
+      <li>MobileNetV3 extends V2 with hard-swish activation and NAS-tuned block configurations</li>
+      <li>The manifold hypothesis provided the first proper theoretical grounding for why depthwise separable blocks work</li>
+    </ul>
+    <div class="callout callout-blue">MBConv is arguably the most influential block in efficient CNN design. It appears in EfficientNet (B0–B7), EfficientNetV2, MobileNetV3, and is the default block in most mobile benchmark models.</div>
+  </div>
+  <div id="mobilenetv2-refs" class="section">
+    <div class="ref-item"><span class="ref-num">[1]</span> Sandler, M., Howard, A., Zhu, M., Zhmoginov, A., &amp; Chen, L. C. (2018). MobileNetV2: Inverted residuals and linear bottlenecks. <em>CVPR 2018</em>. arXiv:1801.04381</div>
+    <div class="ref-item"><span class="ref-num">[2]</span> Howard, A., Sandler, M., Chu, G., Chen, L. C., Chen, B., Tan, M., ... &amp; Adam, H. (2019). Searching for MobileNetV3. <em>ICCV 2019</em>. arXiv:1905.02244</div>
+  </div>
+</div>
+
+<!-- ═══════════════ CONVNEXT ═══════════════ -->
+<div id="page-convnext" class="arch-page" style="display:none">
+  <div class="page-header">
+    <div class="arch-name">ConvNeXt</div>
+    <div class="arch-meta">
+      <span class="badge badge-blue">T-11</span>
+      <span class="badge badge-green">Liu et al., CVPR 2022</span>
+    </div>
+    <div class="arch-tagline">A ConvNet for the 2020s — modernising ResNet with transformer-inspired design</div>
+  </div>
+  <div class="tab-bar">
+    <button class="tab-btn active" onclick="showTab('convnext','motivation',this)">Motivation</button>
+    <button class="tab-btn" onclick="showTab('convnext','architecture',this)">Architecture</button>
+    <button class="tab-btn" onclick="showTab('convnext','demo',this)">Interactive Demo</button>
+    <button class="tab-btn" onclick="showTab('convnext','results',this)">Results &amp; Impact</button>
+    <button class="tab-btn" onclick="showTab('convnext','reflection',this)">Reflection</button>
+    <button class="tab-btn" onclick="showTab('convnext','refs',this)">References</button>
+  </div>
+  <div id="convnext-motivation" class="section active">
+    <p class="prose">Vision Transformers (ViT, 2021) and Swin Transformer started outperforming CNNs on ImageNet at large scale. The community began questioning whether CNNs were architecturally limited. ConvNeXt's response: take a vanilla ResNet-50 and systematically modernise it with design choices borrowed from Transformers. How far can a pure ConvNet go?</p>
+    <ul class="sec-ul">
+      <li>Swin Transformer achieved 86.4% top-1 with a hierarchical Transformer — previously out of reach for CNNs</li>
+      <li>But was the gain from self-attention itself, or from other design choices (training recipe, activation, normalisation)?</li>
+      <li>ConvNeXt answers: <em>mostly the other design choices</em></li>
+    </ul>
+    <div class="callout callout-blue"><strong>ConvNeXt roadmap:</strong> ResNet-50 (78.8%) → modern training recipe → stem patch → stage ratio → inverted bottleneck → 7×7 depthwise kernel → separate downsampling → LN instead of BN → GELU → fewer norms/acts → 82.0%. No attention, no tokens.</div>
+  </div>
+  <div id="convnext-architecture" class="section">
+    <div class="formula">ConvNeXt Block:
+  x → DWConv(7×7) → LayerNorm → Linear(4×expand) → GELU → Linear(contract) → + x
+
+Transformer Encoder Block (for comparison):
+  x → LayerNorm → Multi-Head Attention → + x
+  x → LayerNorm → MLP(4×expand, GELU) → + x
+
+ConvNeXt = Transformer block with DWConv(7×7) replacing Multi-Head Attention
+         + inverted bottleneck (narrow→wide→narrow)
+         + channel-wise LayerNorm before the expansion</div>
+    <h3 class="sec-h">Key Modernisations from ResNet</h3>
+    <div class="tbl-wrap"><table>
+      <tr><th>Design choice</th><th>ResNet-50</th><th>ConvNeXt-T</th></tr>
+      <tr><td>Training epochs</td><td>90</td><td>300 (AdamW, cosine LR)</td></tr>
+      <tr><td>Stem</td><td>7×7 conv, stride 2</td><td>4×4 conv, stride 4 (patch)</td></tr>
+      <tr><td>Stage ratio</td><td>3:4:6:3</td><td>3:3:9:3</td></tr>
+      <tr><td>Kernel size</td><td>3×3</td><td>7×7 depthwise</td></tr>
+      <tr><td>Activation</td><td>ReLU</td><td>GELU</td></tr>
+      <tr><td>Normalisation</td><td>BatchNorm (3 per block)</td><td>LayerNorm (1 per block)</td></tr>
+      <tr><td>Bottleneck</td><td>Wide→Narrow→Wide</td><td>Narrow→Wide→Narrow (inverted)</td></tr>
+    </table></div>
+  </div>
+  <div id="convnext-demo" class="section">
+    <div class="demo-wrap">
+      <div class="demo-title">ConvNeXt Block vs ResNet Block — Side by Side</div>
+      <div class="demo-sub">Toggle each modernisation to see its effect on the block structure.</div>
+      <div id="cnx-diagram"></div>
+    </div>
+    <div class="demo-wrap" style="margin-top:16px">
+      <div class="demo-title">7×7 Depthwise Kernel — Receptive Field Advantage</div>
+      <div class="demo-sub">Larger kernels see more context per layer. Adjust to compare.</div>
+      <div class="label-row"><span>Kernel size</span><span class="ctrl-val" id="cnx-k-v">7×7</span></div>
+      <input type="range" id="cnx-k" min="1" max="4" step="1" value="3" oninput="cnxKernel()">
+      <div id="cnx-kernel-diag" style="margin-top:10px"></div>
+    </div>
+  </div>
+  <div id="convnext-results" class="section">
+    <div class="tbl-wrap"><table>
+      <tr><th>Model</th><th>Top-1</th><th>Params</th><th>FLOPs</th><th>vs Swin</th></tr>
+      <tr><td>Swin-T</td><td>81.3%</td><td>29M</td><td>4.5B</td><td>—</td></tr>
+      <tr><td>ConvNeXt-T</td><td>82.1%</td><td>28M</td><td>4.5B</td><td>+0.8%</td></tr>
+      <tr><td>Swin-B</td><td>83.5%</td><td>88M</td><td>15.4B</td><td>—</td></tr>
+      <tr><td>ConvNeXt-B</td><td>83.8%</td><td>89M</td><td>15.4B</td><td>+0.3%</td></tr>
+      <tr><td>ConvNeXt-XL (fine-tuned)</td><td>87.0%</td><td>350M</td><td>60B</td><td>SOTA ConvNet</td></tr>
+    </table></div>
+    <div class="callout callout-green">ConvNeXt matches or exceeds Swin Transformer at every scale using only standard convolutions. ConvNeXt-T surpasses Swin-T by 0.8% at identical FLOPs — with no attention mechanism.</div>
+  </div>
+  <div id="convnext-reflection" class="section">
+    <ul class="sec-ul">
+      <li>Large depthwise kernels (7×7) are now cheap since depthwise conv scales with C rather than C²</li>
+      <li>LN vs BN: LN works better with smaller batches and self-supervised pre-training; BN better for very small models on hardware</li>
+      <li>ConvNeXt V2 (2023) adds masked autoencoder pre-training + Global Response Normalization for further gains</li>
+    </ul>
+    <div class="callout callout-amber">ConvNeXt showed that the Transformer's accuracy advantage over CNNs was largely due to training improvements and design modernisations — not self-attention per se. The CNN vs Transformer debate continues with ConvNeXt firmly on the CNN side.</div>
+  </div>
+  <div id="convnext-refs" class="section">
+    <div class="ref-item"><span class="ref-num">[1]</span> Liu, Z., Mao, H., Wu, C. Y., Feichtenhofer, C., Darrell, T., &amp; Xie, S. (2022). A ConvNet for the 2020s. <em>CVPR 2022</em>. arXiv:2201.03545</div>
+    <div class="ref-item"><span class="ref-num">[2]</span> Woo, S., Debnath, S., Hu, R., Chen, X., Liu, Z., Kweon, I. S., &amp; Xie, S. (2023). ConvNeXt V2: Co-designing and scaling ConvNets with masked autoencoders. <em>CVPR 2023</em>. arXiv:2301.00808</div>
+    <div class="ref-item"><span class="ref-num">[3]</span> Liu, Z., Lin, Y., Cao, Y., Hu, H., Wei, Y., Zhang, Z., ... &amp; Guo, B. (2021). Swin Transformer: Hierarchical vision transformer using shifted windows. <em>ICCV 2021</em>. arXiv:2103.14030</div>
+  </div>
+</div>
+
+<!-- ═══════════════ SENET ═══════════════ -->
+<div id="page-senet" class="arch-page" style="display:none">
+  <div class="page-header">
+    <div class="arch-name">SENet</div>
+    <div class="arch-meta">
+      <span class="badge badge-blue">T-12</span>
+      <span class="badge badge-green">Hu et al., CVPR 2018 (ILSVRC 2017 Winner)</span>
+    </div>
+    <div class="arch-tagline">Squeeze-and-Excitation Networks — channel-wise attention</div>
+  </div>
+  <div class="tab-bar">
+    <button class="tab-btn active" onclick="showTab('senet','motivation',this)">Motivation</button>
+    <button class="tab-btn" onclick="showTab('senet','architecture',this)">Architecture</button>
+    <button class="tab-btn" onclick="showTab('senet','demo',this)">Interactive Demo</button>
+    <button class="tab-btn" onclick="showTab('senet','results',this)">Results &amp; Impact</button>
+    <button class="tab-btn" onclick="showTab('senet','reflection',this)">Reflection</button>
+    <button class="tab-btn" onclick="showTab('senet','refs',this)">References</button>
+  </div>
+  <div id="senet-motivation" class="section active">
+    <p class="prose">In a standard CNN, every channel in a feature map is treated with equal importance. But different channels respond to different semantic content — edges, textures, object parts, backgrounds. For a given input image, some channels are far more informative than others. Why not let the network learn which channels to emphasise?</p>
+    <ul class="sec-ul">
+      <li>Channel 42 in layer 3 might activate strongly for dog ears — very useful for a dog classifier</li>
+      <li>Channel 13 might respond to generic background texture — less useful for that specific input</li>
+      <li>Standard conv weights are fixed — same channel importance regardless of input content</li>
+      <li>SE asks: can we compute input-dependent channel weights cheaply?</li>
+    </ul>
+    <div class="callout callout-blue"><strong>Key insight:</strong> Global average pooling can summarise the "channel response strength" into a single number per channel. Two FC layers can then learn which channel combinations to boost and suppress for a given input — adaptively, at inference time.</div>
+  </div>
+  <div id="senet-architecture" class="section">
+    <div class="formula">SE Block:
+
+Squeeze:    z_c = (1/H×W) Σ_{h,w} u_c(h,w)    [global avg pool → C-dim vector]
+
+Excitation: s = σ( W₂ · δ( W₁ · z ) )
+  W₁: C → C/r    (reduction, e.g. r=16)
+  W₂: C/r → C    (expansion)
+  δ = ReLU, σ = Sigmoid                         [output: C weights ∈ [0,1]]
+
+Scale:      x̃_c = s_c · u_c                    [channel-wise multiply]
+
+Parameters per SE block: 2 × C²/r
+  For C=256, r=16:  2 × 256²/16 = 8,192 params (tiny overhead)</div>
+    <h3 class="sec-h">Integration</h3>
+    <ul class="sec-ul">
+      <li>SE block inserted after each residual block — the block's output is recalibrated before being added to the skip</li>
+      <li>Works with any architecture: SE-ResNet, SE-Inception, SE-MobileNet, SE-EfficientNet</li>
+      <li>At inference: global pool is nearly free (already computed for classifier), FC layers run at 1×1 spatial — very fast</li>
+      <li>Reduction ratio r=16: standard choice. r=4 gives slightly higher accuracy at more parameters</li>
+    </ul>
+  </div>
+  <div id="senet-demo" class="section">
+    <div class="demo-wrap">
+      <div class="demo-title">SE Block — Interactive Channel Attention</div>
+      <div class="demo-sub">Simulate what happens when the SE block suppresses uninformative channels and amplifies relevant ones.</div>
+      <div class="ctrl-grid">
+        <div>
+          <div class="label-row"><span>Channels C</span><span class="ctrl-val" id="se-c-v">8</span></div>
+          <input type="range" id="se-c" min="4" max="16" step="4" value="8" oninput="seUpdate()">
+        </div>
+        <div>
+          <div class="label-row"><span>Reduction ratio r</span><span class="ctrl-val" id="se-r-v">2</span></div>
+          <input type="range" id="se-r" min="1" max="4" step="1" value="2" oninput="seUpdate()">
+        </div>
+      </div>
+      <div class="btn-group">
+        <button class="btn" onclick="seRun()">▶ Run SE Block</button>
+        <button class="btn" onclick="seReset()">↺ Reset</button>
+      </div>
+      <div id="se-diagram"></div>
+    </div>
+  </div>
+  <div id="senet-results" class="section">
+    <div class="tbl-wrap"><table>
+      <tr><th>Model</th><th>Top-1</th><th>Top-5</th><th>Extra Params</th></tr>
+      <tr><td>ResNet-50 (baseline)</td><td>74.9%</td><td>92.4%</td><td>—</td></tr>
+      <tr><td>SE-ResNet-50</td><td>76.7%</td><td>93.3%</td><td>+2.5M (+10%)</td></tr>
+      <tr><td>SE-ResNet-101</td><td>77.6%</td><td>93.9%</td><td>+5.3M (+12%)</td></tr>
+      <tr><td>SE-Inception-ResNet-V2</td><td>82.7%</td><td>96.2%</td><td>+2.5M (+4%)</td></tr>
+    </table></div>
+    <div class="callout callout-green">Won ILSVRC 2017 with 2.251% top-5 error. SE-ResNet-50 gains +1.8% top-1 at only +10% parameter overhead. The SE block is essentially free in FLOPs — the FC layers run at 1×1 spatial resolution.</div>
+  </div>
+  <div id="senet-reflection" class="section">
+    <ul class="sec-ul">
+      <li>Channel attention alone is less powerful than joint spatial+channel attention — CBAM (2018) adds a spatial attention branch</li>
+      <li>SE adds sequential computation — slightly reduces GPU utilisation on highly parallel architectures</li>
+      <li>Reduction ratio r is a hyperparameter — r=16 is robust but not optimal for all channel counts</li>
+    </ul>
+    <div class="callout callout-blue">SE blocks are now a standard component in efficient architectures — EfficientNet includes them in every MBConv block. The squeeze-and-excitation idea generalises naturally to spatial attention (CBAM) and self-attention (Transformers weight tokens, SE weights channels).</div>
+  </div>
+  <div id="senet-refs" class="section">
+    <div class="ref-item"><span class="ref-num">[1]</span> Hu, J., Shen, L., &amp; Sun, G. (2018). Squeeze-and-excitation networks. <em>CVPR 2018</em>. arXiv:1709.01507</div>
+    <div class="ref-item"><span class="ref-num">[2]</span> Woo, S., Park, J., Lee, J. Y., &amp; Kweon, I. S. (2018). CBAM: Convolutional block attention module. <em>ECCV 2018</em>. arXiv:1807.06521</div>
+    <div class="ref-item"><span class="ref-num">[3]</span> Tan, M., &amp; Le, Q. (2019). EfficientNet: Rethinking model scaling (includes SE in MBConv). <em>ICML 2019</em>. arXiv:1905.11946</div>
+  </div>
+</div>
+
+</div><!-- end #main -->
+
+<script>
+// ── Navigation ──────────────────────────────────────────────────────────────
+const pages = ['resnet','densenet','mobilenet','squeezenet','efficientnet',
+               'resnext','shufflenet','xception','nasnet','mobilenetv2','convnext','senet'];
+
+function show(id) {
+  pages.forEach(p => {
+    document.getElementById('page-'+p).style.display = p===id ? 'block' : 'none';
+    document.getElementById('btn-'+p).classList.toggle('active', p===id);
+  });
+}
+
+function showTab(arch, tab, btn) {
+  const page = document.getElementById('page-'+arch);
+  page.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  page.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById(arch+'-'+tab).classList.add('active');
+  btn.classList.add('active');
+}
+
+// ── Helpers ──────────────────────────────────────────────────────────────────
+const COLORS = ['#4f8ef7','#3ecf8e','#f5a623','#e85858','#a78bfa','#34d5f0','#f76d6d','#7ef5a0'];
+function el(id){ return document.getElementById(id); }
+function fmt(n){ return n.toLocaleString(); }
+
+function barRow(label, val, max, color, unit='') {
+  const pct = Math.min(100, (val/max)*100);
+  return `<div style="margin-bottom:10px">
+    <div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:4px">
+      <span style="color:#9ba3b8">${label}</span>
+      <span style="color:${color};font-family:var(--mono)">${typeof val==='number'?fmt(val):val}${unit}</span>
+    </div>
+    <div style="height:8px;background:#1e2028;border-radius:4px;overflow:hidden">
+      <div style="height:100%;width:${pct}%;background:${color};border-radius:4px;transition:width 0.5s"></div>
+    </div>
+  </div>`;
+}
+
+// ── RESNET demos ─────────────────────────────────────────────────────────────
+let rnStep = -1, rnTimer = null;
+
+function rnRender() {
+  const x  = parseFloat(el('rn-x').value)  || 0;
+  const w1 = parseFloat(el('rn-w1').value) || 0;
+  const w2 = parseFloat(el('rn-w2').value) || 0;
+  const l1 = Math.max(0, x * w1);          // ReLU
+  const l2 = Math.max(0, l1 * w2);         // ReLU — F(x)
+  const hx = l2 + x;
+  const s  = rnStep;
+
+  const blk = (label, sub, cls='') =>
+    `<div class="blk ${cls}" style="min-width:76px;text-align:center">
+       <div style="font-size:12px">${label}</div>
+       <div style="font-size:10px;font-family:var(--mono);margin-top:2px;color:inherit;opacity:0.85">${sub}</div>
+     </div>`;
+  const arr = (on) => `<div class="arrow ${on?'lit':''}">→</div>`;
+
+  el('rn-diagram').innerHTML = `
+    <div style="margin-bottom:6px;font-size:11px;color:#5c6480">Main path  F(x) = max(0, W2 · max(0, W1·x)):</div>
+    <div class="flow" style="flex-wrap:wrap">
+      ${blk('IN', s>=0 ? x.toFixed(2) : 'x', s>=0?'blk-blue':'')}
+      ${arr(s>=0)}
+      ${blk('W1·x', s>=1 ? (x*w1).toFixed(2) : '?', s>=1?'blk-amber':'')}
+      ${arr(s>=1)}
+      ${blk('ReLU → L1', s>=1 ? l1.toFixed(2) : '?', s>=1?'blk-amber':'')}
+      ${arr(s>=2)}
+      ${blk('W2·L1', s>=2 ? (l1*w2).toFixed(2) : '?', s>=2?'blk-amber':'')}
+      ${arr(s>=2)}
+      ${blk('ReLU → F(x)', s>=2 ? l2.toFixed(2) : '?', s>=2?'blk-amber':'')}
+    </div>
+    <div style="margin:10px 0;padding:10px 14px;background:${s>=0?'#0a2a1e':'#1e2028'};border:1px solid ${s>=0?'#1a5040':'#2a2d38'};border-radius:6px;font-size:12px;transition:all 0.3s">
+      <span style="color:${s>=0?'#3ecf8e':'#5c6480'}">↗ Skip connection — x = ${s>=0?x.toFixed(2):'?'} passes unchanged</span>
+    </div>
+    <div class="flow" style="flex-wrap:wrap">
+      ${blk('F(x)', s>=2 ? l2.toFixed(2) : '?', s>=2?'blk-amber':'')}
+      <div style="font-size:20px;padding:0 6px;color:#9ba3b8">+</div>
+      ${blk('skip x', s>=0 ? x.toFixed(2) : '?', s>=0?'blk-green':'')}
+      ${arr(s>=3)}
+      ${blk('H(x) OUT', s>=3 ? hx.toFixed(2) : '?', s>=3?'blk-blue':'')}
+    </div>
+    ${s>=3 ? `<div class="callout callout-green" style="margin-top:12px">
+      H(x) = F(x) + x = ${l2.toFixed(2)} + ${x} = <strong>${hx.toFixed(2)}</strong>.
+      If W1→0 and W2→0, then F(x)→0 and H(x)→x — the network learns identity effortlessly.
+    </div>` : ''}`;
+}
+
+function rnRun() {
+  if(rnTimer) { clearInterval(rnTimer); rnTimer=null; }
+  rnStep = -1; rnRender();
+  let i=0; rnTimer = setInterval(()=>{ rnStep=i; rnRender(); i++; if(i>3){clearInterval(rnTimer);rnTimer=null;} },430);
+}
+function rnReset() {
+  if(rnTimer){clearInterval(rnTimer);rnTimer=null;}
+  rnStep=-1; rnRender();
+}
+['rn-x','rn-w1','rn-w2'].forEach(id=>el(id).addEventListener('input',()=>{rnStep=-1;rnRender();}));
+
+function rnGrad() {
+  const depth = parseInt(el('rn-depth').value);
+  el('rn-depth-v').textContent = depth+' layers';
+  const plain=[], res=[];
+  for(let i=1;i<=depth;i++){
+    plain.push(Math.pow(0.7,i));       // gradient shrinks 30% per layer
+    res.push(Math.max(0.6, 1-0.004*i)); // skip connection preserves most gradient
+  }
+  const maxH=120, W=Math.min(el('rn-grad-chart').offsetWidth||600,600);
+  const bw = Math.max(3, Math.floor((W-60)/depth)-2);
+  let bars='';
+  for(let i=0;i<depth;i++){
+    const ph = Math.round(plain[i]*maxH);
+    const rh = Math.round(res[i]*maxH);
+    bars+=`<div style="display:flex;flex-direction:column;align-items:center;gap:2px;width:${bw+4}px">
+      <div style="display:flex;gap:1px;align-items:flex-end;height:${maxH}px">
+        <div style="width:${bw/2}px;height:${ph}px;background:#e85858;border-radius:2px 2px 0 0;transition:height 0.3s" title="Plain: ${(plain[i]*100).toFixed(0)}%"></div>
+        <div style="width:${bw/2}px;height:${rh}px;background:#3ecf8e;border-radius:2px 2px 0 0;transition:height 0.3s" title="ResNet: ${(rh/maxH*100).toFixed(0)}%"></div>
+      </div>
+    </div>`;
+  }
+  el('rn-grad-chart').innerHTML=`
+    <div style="display:flex;align-items:flex-end;gap:1px;overflow-x:auto;padding-bottom:4px">${bars}</div>
+    <div style="font-size:11px;color:#5c6480;margin-top:8px">Each bar = one layer. Left (red) = plain net gradient magnitude. Right (green) = ResNet gradient magnitude.</div>
+    <div style="display:flex;gap:16px;margin-top:8px">
+      <span style="font-size:12px;color:#e85858">■ Plain: gradient at layer 1 = ${(plain[depth-1]*100).toFixed(1)}% of original</span>
+      <span style="font-size:12px;color:#3ecf8e">■ ResNet: gradient at layer 1 = ${(res[depth-1]*100).toFixed(1)}% of original</span>
+    </div>`;
+}
+
+// ── DENSENET demo ─────────────────────────────────────────────────────────────
+function dnUpdate() {
+  const L = parseInt(el('dn-L').value);
+  el('dn-L-v').textContent = L+' layers';
+  const k=12, k0=16;
+  let html='<div style="display:flex;gap:8px;align-items:flex-end;overflow-x:auto;padding-bottom:8px">';
+  for(let i=0;i<=L;i++){
+    const ch = k0 + i*k;
+    const isInput = i===0;
+    const color = COLORS[i % COLORS.length];
+    html+=`<div style="display:flex;flex-direction:column;align-items:center;gap:6px;min-width:80px">`;
+    if(!isInput){
+      html+=`<div style="width:100%;padding:0 4px">`;
+      for(let r=0;r<i;r++){
+        html+=`<div style="height:3px;margin-bottom:2px;background:${COLORS[r%COLORS.length]};border-radius:2px;opacity:0.8"></div>`;
+      }
+      html+=`</div>`;
+    } else {
+      html+=`<div style="height:14px"></div>`;
+    }
+    html+=`<div style="background:#1e2028;border:1px solid ${color};border-radius:6px;padding:10px 6px;text-align:center;width:100%">
+      <div style="font-size:11px;font-weight:500;color:${color}">${isInput?'Input':'L'+i}</div>
+      <div style="font-size:10px;color:#9ba3b8;font-family:var(--mono)">${ch}ch</div>
+      ${!isInput?`<div style="font-size:9px;color:#5c6480">+${k}new</div>`:''}
+    </div></div>`;
+  }
+  html+='</div>';
+  const totalConn = L*(L+1)/2;
+  html+=`<div class="callout callout-green" style="margin-top:8px">
+    ${L} layers → <strong>${totalConn} connections</strong> (vs ${L} in plain net).
+    Final layer input = ${k0} + ${L-1}×${k} = ${k0+(L-1)*k} channels → outputs ${k} → total output ${k0+L*k}ch.
+  </div>`;
+  el('dn-diagram').innerHTML=html;
+
+  // Connection count comparison
+  let comp='<div style="margin-top:8px">';
+  comp+=barRow('DenseNet (L='+L+')', totalConn, Math.max(totalConn,L*3), '#4f8ef7', ' connections');
+  comp+=barRow('ResNet (L='+L+')', L, Math.max(totalConn,L*3), '#3ecf8e', ' connections');
+  comp+=barRow('Plain Net (L='+L+')', L, Math.max(totalConn,L*3), '#e85858', ' connections');
+  comp+='</div>';
+  el('dn-connections').innerHTML=comp;
+}
+
+// ── MOBILENET demo ────────────────────────────────────────────────────────────
+function mnUpdate() {
+  const ci = parseInt(el('mn-ci').value);
+  const co = parseInt(el('mn-co').value);
+  const kv = parseInt(el('mn-k').value);
+  const k  = [1,3,5][kv-1];
+  el('mn-ci-v').textContent=ci;
+  el('mn-co-v').textContent=co;
+  el('mn-k-v').textContent=k+'×'+k;
+
+  const std = k*k*ci*co;
+  const dw  = k*k*ci;
+  const pw  = ci*co;
+  const mob = dw+pw;
+  const ratio = (std/mob).toFixed(2);
+
+  el('mn-diagram').innerHTML=`
+    <div class="grid2">
+      <div class="stat-card">
+        <div class="label">Standard Conv ${k}×${k}</div>
+        <div class="flow-col" style="margin:10px 0">
+          <div class="blk blk-blue">Input<sub style="font-family:var(--mono)">${ci} ch</sub></div>
+          <div style="color:#5c6480">↓</div>
+          <div class="blk blk-amber">${k}×${k} Conv<sub style="font-family:var(--mono)">${co} filters</sub></div>
+          <div style="color:#5c6480">↓</div>
+          <div class="blk blk-blue">Output<sub style="font-family:var(--mono)">${co} ch</sub></div>
+        </div>
+        <div style="background:#2a0e0e;border:1px solid #5a1e1e;border-radius:6px;padding:10px;text-align:center">
+          <div style="font-size:11px;color:#5c6480">Parameters</div>
+          <div style="font-size:22px;font-weight:700;color:#e85858;font-family:var(--mono)">${fmt(std)}</div>
+          <div style="font-size:10px;color:#5c6480">${k}×${k}×${ci}×${co}</div>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="label">Depthwise Separable</div>
+        <div class="flow-col" style="margin:10px 0">
+          <div class="blk blk-blue">Input<sub style="font-family:var(--mono)">${ci} ch</sub></div>
+          <div style="color:#5c6480">↓</div>
+          <div class="blk blk-amber">DW ${k}×${k}<sub style="font-family:var(--mono)">1 filter/ch → ${ci} ch</sub></div>
+          <div style="color:#5c6480">↓</div>
+          <div class="blk blk-green">PW 1×1<sub style="font-family:var(--mono)">${ci}→${co} ch</sub></div>
+          <div style="color:#5c6480">↓</div>
+          <div class="blk blk-blue">Output<sub style="font-family:var(--mono)">${co} ch</sub></div>
+        </div>
+        <div style="background:#0a2a1e;border:1px solid #1a5040;border-radius:6px;padding:10px;text-align:center">
+          <div style="font-size:11px;color:#5c6480">Parameters</div>
+          <div style="font-size:22px;font-weight:700;color:#3ecf8e;font-family:var(--mono)">${fmt(mob)}</div>
+          <div style="font-size:10px;color:#5c6480">${k}×${k}×${ci} + ${ci}×${co} = ${fmt(dw)}+${fmt(pw)}</div>
+        </div>
+      </div>
+    </div>
+    <div class="callout callout-blue" style="margin-top:12px">
+      <strong>${ratio}× fewer parameters.</strong>
+      Theoretical reduction = 1/${co} + 1/${k*k} = ${(1/co+1/(k*k)).toFixed(4)} ≈ 1/${Math.round(1/(1/co+1/(k*k)))}×.
+      Standard: ${fmt(std)} params → Depthwise Sep: ${fmt(mob)} params.
+    </div>`;
+}
+
+// ── SQUEEZENET demo ───────────────────────────────────────────────────────────
+function sqUpdate() {
+  const M  = parseInt(el('sq-M').value);
+  const s1 = parseInt(el('sq-s1').value);
+  const e1 = parseInt(el('sq-e1').value);
+  const e3 = parseInt(el('sq-e3').value);
+  el('sq-M-v').textContent=M;
+  el('sq-s1-v').textContent=s1;
+  el('sq-e1-v').textContent=e1;
+  el('sq-e3-v').textContent=e3;
+
+  const pSqueeze = M*s1;
+  const pExp1   = s1*e1;
+  const pExp3   = s1*9*e3;
+  const pTotal  = pSqueeze+pExp1+pExp3;
+  const pNaive  = M*9*(e1+e3);
+  const ratio   = (pNaive/pTotal).toFixed(2);
+  const out     = e1+e3;
+
+  el('sq-diagram').innerHTML=`
+    <div style="display:flex;flex-direction:column;align-items:center;gap:8px">
+      <div class="blk blk-blue">Input<sub style="font-family:var(--mono)">${M} channels</sub></div>
+      <div style="color:#5c6480">↓ squeeze ↓</div>
+      <div class="blk blk-amber">Squeeze 1×1<sub style="font-family:var(--mono)">${s1} filters (${(M/s1).toFixed(0)}× fewer ch)</sub></div>
+      <div style="color:#5c6480">↓ expand (parallel) ↓</div>
+      <div style="display:flex;gap:20px">
+        <div class="flow-col">
+          <div style="font-size:10px;color:#5c6480">Branch A (1×1)</div>
+          <div class="blk blk-green">e₁×₁<sub style="font-family:var(--mono)">${e1} filters</sub></div>
+        </div>
+        <div class="flow-col">
+          <div style="font-size:10px;color:#5c6480">Branch B (3×3)</div>
+          <div class="blk blk-purple">e₃×₃<sub style="font-family:var(--mono)">${e3} filters</sub></div>
+        </div>
+      </div>
+      <div style="font-size:12px;color:#9ba3b8">⊕ concat ${e1} + ${e3} = ${out} channels</div>
+      <div class="blk blk-blue">Output<sub style="font-family:var(--mono)">${out} channels</sub></div>
+    </div>
+    <div style="margin-top:14px">
+      ${barRow('Squeeze layer', pSqueeze, pTotal, '#f5a623', ' params')}
+      ${barRow('Expand 1×1', pExp1, pTotal, '#3ecf8e', ' params')}
+      ${barRow('Expand 3×3', pExp3, pTotal, '#a78bfa', ' params')}
+    </div>
+    <div class="callout callout-green" style="margin-top:8px">
+      Fire module: <strong>${fmt(pTotal)} params</strong> vs naive (direct 3×3 to ${out}ch): ${fmt(pNaive)} params → <strong>${ratio}× reduction</strong>.
+      Squeeze ratio: ${M}→${s1} = ${((s1/M)*100).toFixed(0)}% of original channels fed to 3×3 conv.
+    </div>`;
+}
+
+// ── EFFICIENTNET demo ─────────────────────────────────────────────────────────
+const effData = {
+  acc:    [77.1, 79.1, 80.1, 81.6, 82.9, 83.6, 84.0, 84.3],
+  params: [5.3,  7.8,  9.2,  12,   19,   30,   43,   66],
+  flops:  [0.39, 0.7,  1.0,  1.8,  4.2,  9.9,  19,   37],
+  res:    [224,  240,  260,  300,  380,  456,  528,  600]
+};
+const alpha=1.2, beta=1.1, gamma=1.15;
+
+function effUpdate() {
+  const phi = parseInt(el('eff-phi').value);
+  el('eff-v').textContent='B'+phi;
+  const d=(alpha**phi).toFixed(2), w=(beta**phi).toFixed(2), r=(gamma**phi).toFixed(2);
+  const i=phi;
+
+  el('eff-diagram').innerHTML=`
+    <div class="grid3" style="margin-bottom:14px">
+      <div style="background:#0f1e3a;border:1px solid #1e3a6e;border-radius:6px;padding:12px;text-align:center">
+        <div style="font-size:11px;color:#5c6480">Depth  d = α^φ</div>
+        <div style="font-size:28px;font-weight:700;color:#4f8ef7;font-family:var(--mono)">${d}×</div>
+        <div style="font-size:10px;color:#5c6480">${alpha}^${phi}</div>
+      </div>
+      <div style="background:#0a2a1e;border:1px solid #1a5040;border-radius:6px;padding:12px;text-align:center">
+        <div style="font-size:11px;color:#5c6480">Width  w = β^φ</div>
+        <div style="font-size:28px;font-weight:700;color:#3ecf8e;font-family:var(--mono)">${w}×</div>
+        <div style="font-size:10px;color:#5c6480">${beta}^${phi}</div>
+      </div>
+      <div style="background:#2a1e08;border:1px solid #5a3e10;border-radius:6px;padding:12px;text-align:center">
+        <div style="font-size:11px;color:#5c6480">Resolution r = γ^φ</div>
+        <div style="font-size:28px;font-weight:700;color:#f5a623;font-family:var(--mono)">${r}×</div>
+        <div style="font-size:10px;color:#5c6480">${gamma}^${phi} → ${effData.res[i]}px</div>
+      </div>
+    </div>
+    <div class="grid2">
+      <div style="background:#0a2a1e;border:1px solid #1a5040;border-radius:6px;padding:14px">
+        <div style="font-size:11px;color:#5c6480">ImageNet Top-1 Acc</div>
+        <div style="font-size:32px;font-weight:700;color:#3ecf8e;font-family:var(--mono)">${effData.acc[i]}%</div>
+        <div style="height:6px;background:#1e2028;border-radius:3px;margin-top:8px">
+          <div style="height:100%;width:${((effData.acc[i]-76)/9*100).toFixed(0)}%;background:#3ecf8e;border-radius:3px;transition:width 0.4s"></div>
+        </div>
+      </div>
+      <div style="background:#2a1e08;border:1px solid #5a3e10;border-radius:6px;padding:14px">
+        <div style="font-size:11px;color:#5c6480">Parameters</div>
+        <div style="font-size:32px;font-weight:700;color:#f5a623;font-family:var(--mono)">${effData.params[i]}M</div>
+        <div style="height:6px;background:#1e2028;border-radius:3px;margin-top:8px">
+          <div style="height:100%;width:${(effData.params[i]/66*100).toFixed(0)}%;background:#f5a623;border-radius:3px;transition:width 0.4s"></div>
+        </div>
+      </div>
+    </div>
+    <div class="callout callout-blue" style="margin-top:12px">
+      Constraint check: α·β²·γ² = ${alpha}×${beta}²×${gamma}² = <strong>${(alpha*beta*beta*gamma*gamma).toFixed(3)}</strong> ≈ 2.
+      Each unit increase in φ ≈ doubles FLOPs.
+      B${phi} uses ${effData.flops[i]}B FLOPs at ${effData.res[i]}×${effData.res[i]} resolution.
+    </div>`;
+}
+
+// ── RESNEXT demo ──────────────────────────────────────────────────────────────
+function rx2Update() {
+  const ch = parseInt(el('rx2-ch').value);
+  const C  = parseInt(el('rx2-c').value);
+  el('rx2-ch-v').textContent=ch;
+  el('rx2-c-v').textContent=C;
+  const cpg = Math.max(1, Math.floor(ch/C));
+  const stdP = ch*ch*9;
+  const grpP = C * cpg * cpg * 9;
+  const ratio = (stdP/grpP).toFixed(2);
+
+  let groups='';
+  const show = Math.min(C, 8);
+  for(let i=0;i<show;i++){
+    const col = COLORS[i%COLORS.length];
+    groups+=`<div style="background:#1e2028;border:1px solid ${col};border-radius:6px;padding:8px;text-align:center;min-width:64px">
+      <div style="font-size:11px;color:${col}">G${i+1}</div>
+      <div style="font-size:10px;color:#5c6480;font-family:var(--mono)">${cpg}ch</div>
+    </div>`;
+  }
+  if(C>8) groups+=`<div style="align-self:center;color:#5c6480;font-size:20px;padding:0 4px">+${C-8}</div>`;
+
+  el('rx2-diagram').innerHTML=`
+    <div class="flow-col">
+      <div class="blk blk-blue">Input<sub style="font-family:var(--mono)">${ch} channels</sub></div>
+      <div style="font-size:11px;color:#9ba3b8">split into ${C} groups of ${cpg}ch</div>
+      <div style="display:flex;gap:6px;flex-wrap:wrap;justify-content:center">${groups}</div>
+      <div style="font-size:11px;color:#9ba3b8">aggregate (sum of group outputs)</div>
+      <div style="display:flex;align-items:center;gap:10px">
+        <div class="blk blk-amber">Concat<sub style="font-family:var(--mono)">${ch}ch</sub></div>
+        <div style="color:#9ba3b8">+</div>
+        <div class="blk blk-green">skip x<sub style="font-family:var(--mono)">${ch}ch</sub></div>
+        <div class="arrow lit">→</div>
+        <div class="blk blk-blue">Out<sub style="font-family:var(--mono)">${ch}ch</sub></div>
+      </div>
+    </div>
+    <div style="margin-top:14px">
+      ${barRow('Standard 3×3 params', stdP, stdP, '#e85858', ' params')}
+      ${barRow('Grouped (C='+C+') params', grpP, stdP, '#3ecf8e', ' params')}
+    </div>
+    <div class="callout callout-green" style="margin-top:8px">
+      <strong>${ratio}× parameter reduction</strong> from grouping.
+      Each group handles ${cpg}ch × ${cpg}ch × 9 = ${cpg*cpg*9} params (vs ${ch*ch*9} for standard).
+      Total grouped: ${C} × ${cpg*cpg*9} = ${fmt(grpP)}.
+    </div>`;
+}
+
+// ── SHUFFLENET demo ───────────────────────────────────────────────────────────
+let sfAnimating=false;
+
+function sfUpdate() {
+  const g = parseInt(el('sf-g').value);
+  const n = parseInt(el('sf-n').value);
+  el('sf-g-v').textContent=g;
+  el('sf-n-v').textContent=n;
+  sfDraw(false);
+}
+
+function sfDraw(shuffled) {
+  const g = parseInt(el('sf-g').value);
+  const n = parseInt(el('sf-n').value);
+  const total = g*n;
+  let inHtml='', outHtml='';
+
+  // Build input channels (grouped by color)
+  const channels=[];
+  for(let gi=0;gi<g;gi++){
+    for(let ci=0;ci<n;ci++) channels.push({gi, ci, idx:gi*n+ci});
+  }
+
+  // After shuffle: channel i in group j → channel j in group i
+  // New channel at position gi*n+ci (group gi, slot ci) = old channel ci*g+gi
+  for(let idx=0;idx<total;idx++){
+    const gi = Math.floor(idx/n), ci = idx%n;
+    const col = COLORS[gi%COLORS.length];
+    inHtml+=`<div id="sfch-${idx}" style="width:32px;height:32px;border-radius:6px;background:${col};display:flex;align-items:center;justify-content:center;font-size:10px;color:#0e0f11;font-weight:600;transition:all 0.5s">G${gi+1}.${ci+1}</div>`;
+  }
+
+  let lines='';
+  for(let idx=0;idx<total;idx++){
+    const gi = Math.floor(idx/n), ci = idx%n;
+    // Where does this channel go after shuffle?
+    const newIdx = ci*g + gi;
+    const srcY = idx; const dstY = newIdx;
+    const srcGi = gi;
+    const col = COLORS[srcGi%COLORS.length];
+    const x1=0, x2=100;
+    const y1 = (srcY+0.5)/(total); const y2 = (dstY+0.5)/(total);
+    lines+=`<line x1="${x1}%" y1="${(y1*100).toFixed(1)}%" x2="${x2}%" y2="${(y2*100).toFixed(1)}%" stroke="${col}" stroke-width="1.5" stroke-opacity="${shuffled?0.9:0.3}"/>`;
+  }
+
+  // Output: after shuffle
+  const outOrder = [];
+  for(let idx=0;idx<total;idx++){
+    const gi=Math.floor(idx/n), ci=idx%n;
+    const srcIdx = ci*g+gi; // which original channel ends up here
+    const srcGi = Math.floor(srcIdx/n);
+    outOrder.push(srcGi);
+  }
+  for(let idx=0;idx<total;idx++){
+    const gi=outOrder[idx];
+    const col = COLORS[gi%COLORS.length];
+    outHtml+=`<div style="width:32px;height:32px;border-radius:6px;background:${shuffled?col:'#2a2d38'};border:1px solid ${col};display:flex;align-items:center;justify-content:center;font-size:10px;color:${shuffled?'#0e0f11':col};font-weight:600;transition:all 0.5s">${shuffled?'G'+(gi+1):'?'}</div>`;
+  }
+
+  el('sf-diagram').innerHTML=`
+    <div style="display:grid;grid-template-columns:80px 1fr 80px;gap:8px;align-items:center">
+      <div>
+        <div style="font-size:11px;color:#5c6480;margin-bottom:8px;text-align:center">Input channels</div>
+        <div style="display:flex;flex-direction:column;gap:4px">${inHtml}</div>
+      </div>
+      <div style="position:relative">
+        <svg width="100%" height="${total*36}px" style="display:block">${lines}</svg>
+        <div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);background:#1e2028;border:1px solid #2a2d38;border-radius:4px;padding:4px 8px;font-size:11px;color:${shuffled?'#3ecf8e':'#5c6480'};white-space:nowrap;transition:color 0.3s">
+          ${shuffled?'✓ Shuffled':'reshape → transpose → flatten'}
+        </div>
+      </div>
+      <div>
+        <div style="font-size:11px;color:#5c6480;margin-bottom:8px;text-align:center">Output channels</div>
+        <div style="display:flex;flex-direction:column;gap:4px">${outHtml}</div>
+      </div>
+    </div>
+    <div style="margin-top:12px;display:flex;gap:8px;flex-wrap:wrap">
+      ${Array.from({length:g},(_,i)=>`<span style="background:${COLORS[i%COLORS.length]}20;border:1px solid ${COLORS[i%COLORS.length]};border-radius:20px;padding:2px 10px;font-size:11px;color:${COLORS[i%COLORS.length]}">Group ${i+1}</span>`).join('')}
+    </div>
+    ${shuffled?`<div class="callout callout-green" style="margin-top:8px">After shuffle: each output position contains one channel from each original group → complete cross-group mixing with zero extra parameters.</div>`:''}`;
+}
+
+function sfAnimate() {
+  if(sfAnimating) return;
+  sfAnimating=true;
+  sfDraw(false);
+  setTimeout(()=>{ sfDraw(true); sfAnimating=false; },400);
+}
+function sfReset(){ sfDraw(false); }
+
+// ── XCEPTION demos ────────────────────────────────────────────────────────────
+const xcSteps=[
+  {title:'Standard Inception Branch',
+   desc:'A single branch applies a 3×3 conv that mixes both spatial and channel dimensions simultaneously.',
+   blocks:['Input','3×3 Conv\n(spatial+channel\nmixed)','Output'],
+   colors:['blk-blue','blk-red','blk-blue']},
+  {title:'Simplified Inception (1×1 first)',
+   desc:'First apply a 1×1 conv (cross-channel only), then a 3×3 (spatial). This factorises the operations.',
+   blocks:['Input','1×1 Conv\n(channel only)','3×3 Conv\n(spatial only)','Output'],
+   colors:['blk-blue','blk-green','blk-amber','blk-blue']},
+  {title:'Extreme: One Branch Per Channel',
+   desc:'Push to the limit: as many branches as input channels. Each branch handles one channel spatially.',
+   blocks:['Input (C ch)','C parallel\n1×1 convs','C parallel\n3×3 DW convs','Concat→Output'],
+   colors:['blk-blue','blk-green','blk-amber','blk-blue']},
+  {title:'= Xception (Depthwise Separable)',
+   desc:'The extreme Inception limit IS a depthwise separable conv — but arrived at from first principles, not heuristics.',
+   blocks:['Input','1×1 PW\n(cross-channel)','3×3 DW\n(per channel)','Output'],
+   colors:['blk-blue','blk-green','blk-purple','blk-blue']}
+];
+
+function xcStep(i) {
+  const s=xcSteps[i];
+  let html=`<div style="margin-bottom:10px"><div style="font-size:13px;font-weight:600;color:#e8eaf0;margin-bottom:4px">${s.title}</div>
+    <div style="font-size:12px;color:#9ba3b8;margin-bottom:12px">${s.desc}</div>
+    <div class="flow" style="flex-wrap:wrap">`;
+  s.blocks.forEach((b,j)=>{
+    html+=`<div class="blk ${s.colors[j]}" style="white-space:pre-line;text-align:center;min-width:90px;font-size:11px">${b}</div>`;
+    if(j<s.blocks.length-1) html+=`<div class="arrow lit">→</div>`;
+  });
+  html+=`</div></div>`;
+  if(i===3){
+    html+=`<div class="callout callout-blue">Xception key difference from MobileNet: order is <strong>pointwise first, then depthwise</strong> (vs depthwise first, then pointwise in MobileNet). Also: <strong>no ReLU</strong> between the two operations.</div>`;
+  }
+  el('xc-diagram').innerHTML=html;
+}
+
+function xcCalc() {
+  const C  = parseInt(el('xc-c').value);
+  const Co = parseInt(el('xc-co').value);
+  el('xc-c-v').textContent=C;
+  el('xc-co-v').textContent=Co;
+  const std=9*C*Co, dw=9*C, pw=C*Co, tot=dw+pw;
+  el('xc-calc').innerHTML=`
+    ${barRow('Standard 3×3 conv', std, std, '#e85858', ' params')}
+    ${barRow('Depthwise (3×3×'+C+')', dw, std, '#3ecf8e', ' params')}
+    ${barRow('Pointwise ('+C+'×'+Co+')', pw, std, '#4f8ef7', ' params')}
+    ${barRow('Total Depthwise Sep', tot, std, '#a78bfa', ' params')}
+    <div class="callout callout-green" style="margin-top:8px">
+      Reduction: ${std} → ${tot} = <strong>${(std/tot).toFixed(2)}×</strong> fewer parameters.
+      Formula: 1/C_out + 1/k² = 1/${Co} + 1/9 = ${(1/Co+1/9).toFixed(4)} → ${(1/(1/Co+1/9)).toFixed(1)}× reduction.
+    </div>`;
+}
+
+// ── NASNET demo ───────────────────────────────────────────────────────────────
+const nasOps=['sep 3×3','sep 5×5','avg pool 3×3','max pool 3×3','identity','dilated 3×3','1×7→7×1','sep 7×7'];
+let nasCandidates=[], nasFound=false, nasInterval=null;
+
+function nasReset(){
+  if(nasInterval){clearInterval(nasInterval);nasInterval=null;}
+  nasCandidates=[]; nasFound=false;
+  el('nas-diagram').innerHTML='<div style="color:#5c6480;font-size:12px">Click Run to simulate the NAS search loop.</div>';
+}
+
+function nasRun(){
+  if(nasInterval) return;
+  nasCandidates=[];
+  let gen=0;
+  const target = [nasOps[4],nasOps[0],nasOps[2],nasOps[3],nasOps[1]]; // "optimal" cell
+  nasInterval = setInterval(()=>{
+    gen++;
+    const acc = Math.min(94, 60+gen*1.2+(Math.random()*4-2));
+    const ops = target.map((t,i)=> gen>i*4 ? t : nasOps[Math.floor(Math.random()*nasOps.length)]);
+    nasCandidates.push({gen, acc:acc.toFixed(1), ops});
+    if(nasCandidates.length>8) nasCandidates.shift();
+    if(gen>=25){clearInterval(nasInterval);nasInterval=null;}
+    let rows='';
+    nasCandidates.forEach((c,i)=>{
+      const isLast = i===nasCandidates.length-1;
+      rows+=`<div style="display:grid;grid-template-columns:50px 60px 1fr;gap:8px;align-items:center;padding:6px 0;border-bottom:1px solid #1e2028;opacity:${0.4+i*0.075}">
+        <div style="font-family:var(--mono);font-size:12px;color:#5c6480">Gen ${c.gen}</div>
+        <div style="font-family:var(--mono);font-size:12px;color:${isLast?'#3ecf8e':'#f5a623'}">${c.acc}%</div>
+        <div style="font-size:10px;color:#9ba3b8">${c.ops.join(' → ')}</div>
+      </div>`;
+    });
+    el('nas-diagram').innerHTML=`
+      <div style="font-size:12px;color:#9ba3b8;margin-bottom:8px">Controller generates cell, trains proxy on CIFAR-10, updates via REINFORCE reward:</div>
+      ${rows}
+      ${gen>=25?`<div class="callout callout-green" style="margin-top:8px">Search complete (simulated). Best cell found: <strong>${target.join(' → ')}</strong>. In practice this took ~2000 GPU-days.</div>`:''}`;
+  }, 300);
+}
+
+// ── MOBILENETV2 demo ──────────────────────────────────────────────────────────
+let v2Step=-1, v2Timer=null;
+
+function v2Update(){ v2Step=-1; v2Render(); }
+
+function v2Render(){
+  const n  = parseInt(el('v2-n').value);
+  const t  = parseInt(el('v2-t').value);
+  el('v2-n-v').textContent=n;
+  el('v2-t-v').textContent=t;
+  const wide = n*t;
+  const p1 = n*wide, pdw=9*wide, p2=wide*n, ptot=p1+pdw+p2;
+  const s=v2Step;
+
+  const blk=(label,sub,cls,extra='')=>
+    `<div class="blk ${cls}" style="min-width:110px;text-align:center${extra}">
+       <div style="font-size:12px">${label}</div>
+       <div style="font-size:10px;font-family:var(--mono);margin-top:2px;opacity:0.85">${sub}</div>
+     </div>`;
+  const arr=(on,label='')=>`<div style="display:flex;flex-direction:column;align-items:center;gap:2px">
+    <div class="arrow ${on?'lit':''}" style="font-size:22px">↓</div>
+    ${label?`<div style="font-size:10px;color:#5c6480">${label}</div>`:''}
+  </div>`;
+
+  el('v2-diagram').innerHTML=`
+    <div class="flow-col" style="align-items:center">
+      ${blk('Input (narrow)', n+'ch', s>=0?'blk-blue':'')}
+      ${arr(s>=0,'skip saved here')}
+      ${blk('Expand 1×1', n+'→'+wide+'ch  +ReLU6', s>=1?'blk-amber':'')}
+      ${arr(s>=1,'')}
+      ${blk('DW Conv 3×3', wide+'ch  +ReLU6', s>=2?'blk-amber':'')}
+      ${arr(s>=2,'')}
+      ${blk('Project 1×1', wide+'→'+n+'ch  NO act ✓', s>=3?'blk-green':'', ';border-style:dashed')}
+      <div style="display:flex;align-items:center;gap:12px;margin:4px 0">
+        <div style="color:#5c6480;font-size:20px">+</div>
+        ${blk('Skip x', n+'ch', s>=0?'blk-blue':'')}
+      </div>
+      ${arr(s>=4,'')}
+      ${blk('Output (narrow)', n+'ch', s>=4?'blk-blue':'')}
+    </div>
+    <div style="margin-top:14px">
+      ${barRow('Expand 1×1 (n×t×n)', p1, ptot, '#f5a623', ' params')}
+      ${barRow('DW 3×3 (9×t×n)', pdw, ptot, '#a78bfa', ' params')}
+      ${barRow('Project 1×1 (t×n×n)', p2, ptot, '#3ecf8e', ' params')}
+    </div>
+    <div class="callout callout-blue" style="margin-top:8px">
+      Total params: ${fmt(ptot)} | Expansion t=${t}: narrow ${n}ch → wide ${wide}ch → back to ${n}ch.
+      Linear bottleneck (no ReLU on project) preserves the low-dim manifold.
+    </div>
+    ${s<0?`<div style="font-size:12px;color:#5c6480;margin-top:8px">Click "Run Forward Pass" to animate the data flow.</div>`:''}`;
+}
+
+function v2Run(){
+  if(v2Timer){clearInterval(v2Timer);v2Timer=null;}
+  v2Step=-1; v2Render();
+  let i=0; v2Timer=setInterval(()=>{v2Step=i;v2Render();i++;if(i>4){clearInterval(v2Timer);v2Timer=null;}},480);
+}
+function v2Reset(){ if(v2Timer){clearInterval(v2Timer);v2Timer=null;} v2Step=-1; v2Render(); }
+
+// ── CONVNEXT demo ─────────────────────────────────────────────────────────────
+function cnxDiagram(){
+  el('cnx-diagram').innerHTML=`
+    <div class="grid2">
+      <div class="stat-card">
+        <div class="label">ResNet-50 Block</div>
+        <div class="flow-col" style="margin:10px 0;align-items:flex-start">
+          ${['Input (256ch)','Conv 1×1 → 64ch','BN + ReLU','Conv 3×3 → 64ch','BN + ReLU','Conv 1×1 → 256ch','BN','+ skip → ReLU'].map((l,i)=>`
+            <div style="font-size:12px;padding:5px 10px;background:${i===6?'#2a1e08':'#1e2028'};border-left:2px solid ${['#4f8ef7','#f5a623','#e85858','#f5a623','#e85858','#f5a623','#e85858','#3ecf8e'][i]};border-radius:0 4px 4px 0;width:100%;margin-bottom:3px;color:#9ba3b8">${l}</div>`).join('')}
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="label">ConvNeXt Block (modernised)</div>
+        <div class="flow-col" style="margin:10px 0;align-items:flex-start">
+          ${['Input (96ch narrow)','DW Conv 7×7 → 96ch ← large kernel','LayerNorm ← LN not BN','Linear 1×1 → 384ch (4×) ← inverted bottleneck','GELU ← smooth activation','Linear 1×1 → 96ch','+ skip'].map((l,i)=>{
+            const [main,...hint]=l.split(' ← ');
+            return `<div style="font-size:12px;padding:5px 10px;background:${[0,1,2,3,4,5].includes(i)?'#0f1e3a':'#1e2028'};border-left:2px solid ${['#4f8ef7','#a78bfa','#f5a623','#3ecf8e','#f5a623','#3ecf8e','#4f8ef7'][i]};border-radius:0 4px 4px 0;width:100%;margin-bottom:3px">
+              <span style="color:#e8eaf0">${main}</span>${hint.length?`<span style="color:#4f8ef7;font-size:10px"> ← ${hint[0]}</span>`:''}
+            </div>`;
+          }).join('')}
+        </div>
+      </div>
+    </div>
+    <div class="callout callout-blue" style="margin-top:8px">
+      ConvNeXt block = Transformer encoder block with DW-Conv(7×7) replacing Multi-Head Attention.
+      Same structure: norm → main op → expand+activate → contract → skip.
+    </div>`;
+}
+
+const kernelSizes=[1,3,5,7];
+function cnxKernel(){
+  const ki = parseInt(el('cnx-k').value);
+  const k  = kernelSizes[ki-1];
+  el('cnx-k-v').textContent=k+'×'+k;
+  const rf = k; // simplified: receptive field per layer
+  const params_std = k*k; // per channel, relative
+  const params_dw  = k*k; // same for depthwise
+  el('cnx-kernel-diag').innerHTML=`
+    <div class="grid2">
+      <div class="stat-card">
+        <div class="label">Receptive field: ${k}×${k} window</div>
+        <div style="display:grid;grid-template-columns:repeat(${k},1fr);gap:2px;margin-top:10px;max-width:${k*30}px">
+          ${Array.from({length:k*k},(_,i)=>`<div style="width:${Math.min(28,200/k)}px;height:${Math.min(28,200/k)}px;background:${i===Math.floor(k*k/2)?'#4f8ef7':'#2a2d38'};border-radius:3px;border:1px solid #363a48"></div>`).join('')}
+        </div>
+        <div style="font-size:11px;color:#5c6480;margin-top:6px">Center pixel (blue) sees ${k}×${k}=${k*k} context pixels per layer</div>
+      </div>
+      <div class="stat-card">
+        <div class="label">Standard vs Depthwise — cost to use ${k}×${k}</div>
+        <div style="margin-top:10px">
+          ${barRow('Standard conv (C²×k²)', k*k*256*256, k*k*256*256, '#e85858', ' rel. FLOPs')}
+          ${barRow('Depthwise conv (C×k²)', k*k*256, k*k*256*256, '#3ecf8e', ' rel. FLOPs')}
+        </div>
+        <div style="font-size:11px;color:#3ecf8e;margin-top:6px">Depthwise: ${256}× cheaper → large kernels (7×7) become feasible</div>
+      </div>
+    </div>`;
+}
+
+// ── SENET demo ────────────────────────────────────────────────────────────────
+let seStep=-1, seTimer=null;
+let seWeights=[];
+
+function seUpdate(){ seStep=-1; seWeights=[]; seRender(); }
+
+function seRender(){
+  const C = parseInt(el('se-c').value);
+  const r = parseInt(el('se-r').value);
+  el('se-c-v').textContent=C;
+  el('se-r-v').textContent=r;
+  const Cr = Math.max(1, Math.floor(C/r));
+  const p  = C*Cr + Cr*C;
+  const s  = seStep;
+
+  if(s>=2 && seWeights.length!==C){
+    seWeights = Array.from({length:C},(_,i)=>{
+      // Simulate: channels 0..C/3 are "important" for this input
+      return i < C/3 ? 0.85+Math.random()*0.15 : 0.1+Math.random()*0.3;
+    });
+  }
+
+  let chHtml='';
+  for(let i=0;i<C;i++){
+    const w = (s>=2 && seWeights.length) ? seWeights[i] : 1;
+    const col = w>0.7 ? '#3ecf8e' : w>0.4 ? '#f5a623' : '#e85858';
+    chHtml+=`<div style="display:flex;flex-direction:column;align-items:center;gap:3px">
+      <div style="font-size:9px;color:#5c6480">ch${i+1}</div>
+      <div style="width:20px;background:#2a2d38;border-radius:3px;height:60px;position:relative;overflow:hidden">
+        <div style="position:absolute;bottom:0;left:0;right:0;background:${s>=2?col:'#4f8ef7'};border-radius:3px;height:${s>=2?(w*100).toFixed(0):'60'}%;transition:all 0.4s"></div>
+      </div>
+      ${s>=2?`<div style="font-size:9px;font-family:var(--mono);color:${col}">${w.toFixed(2)}</div>`:''}
+    </div>`;
+  }
+
+  el('se-diagram').innerHTML=`
+    <div class="flow" style="flex-wrap:wrap;margin-bottom:14px">
+      <div class="blk blk-blue">Feature maps<sub style="font-family:var(--mono)">${C}×H×W</sub></div>
+      <div class="arrow ${s>=0?'lit':''}">→</div>
+      <div class="blk ${s>=0?'blk-amber':''}">Squeeze<br><span style="font-size:10px">Glob. Avg Pool</span><sub style="font-family:var(--mono)">${C}×1×1</sub></div>
+      <div class="arrow ${s>=1?'lit':''}">→</div>
+      <div class="blk ${s>=1?'blk-purple':''}">FC: ${C}→${Cr}<br><span style="font-size:10px">ReLU</span></div>
+      <div class="arrow ${s>=2?'lit':''}">→</div>
+      <div class="blk ${s>=2?'blk-green':''}">FC: ${Cr}→${C}<br><span style="font-size:10px">Sigmoid [0,1]</span></div>
+      <div class="arrow ${s>=3?'lit':''}">→</div>
+      <div class="blk ${s>=3?'blk-blue':''}">Scale<sub style="font-family:var(--mono)">channel-wise ×</sub></div>
+    </div>
+    <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px">${chHtml}</div>
+    ${s>=2?`<div style="font-size:11px;color:#9ba3b8;margin-top:4px">Green = high attention (informative channels). Red = suppressed (less relevant for this input). <br>SE params: 2×C²/r = 2×${C}²/${r} = ${p} (${((p/(C*256*256*9+p))*100).toFixed(2)}% overhead vs one conv layer at 256ch)</div>`
+    :'<div style="font-size:12px;color:#5c6480">Click "Run SE Block" to see adaptive channel recalibration.</div>'}`;
+}
+
+function seRun(){
+  if(seTimer){clearInterval(seTimer);seTimer=null;}
+  seWeights=[]; seStep=-1; seRender();
+  let i=0; seTimer=setInterval(()=>{seStep=i;seRender();i++;if(i>3){clearInterval(seTimer);seTimer=null;}},500);
+}
+function seReset(){ if(seTimer){clearInterval(seTimer);seTimer=null;} seWeights=[]; seStep=-1; seRender(); }
+
+// ── Init all demos ────────────────────────────────────────────────────────────
+window.addEventListener('DOMContentLoaded',()=>{
+  rnRender(); rnGrad();
+  dnUpdate();
+  mnUpdate();
+  sqUpdate();
+  effUpdate();
+  rx2Update();
+  sfDraw(false);
+  xcStep(0); xcCalc();
+  nasReset();
+  v2Render();
+  cnxDiagram(); cnxKernel();
+  seRender();
+});
+</script>
+</body>
+</html>

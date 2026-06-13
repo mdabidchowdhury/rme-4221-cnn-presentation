@@ -55,8 +55,14 @@ export default function T09_NASNetView() {
           <li><strong>Surpassing Human Design:</strong> NASNet-A achieved an 82.7% top-1 accuracy on ImageNet, outperforming all manually designed human architectures at the time (like Inception-ResNet-v2).</li>
           <li><strong>Transferability:</strong> The architecture proved that cells learned on a small dataset (CIFAR-10) could successfully transfer and scale to much larger, more complex datasets (ImageNet).</li>
           <li><strong>Birth of AutoML:</strong> This paper kickstarted the modern AutoML revolution, leading directly to the development of highly optimized architectures like EfficientNet (which used a similar search strategy).</li>
+          <li><strong>Computational Cost:</strong> The search process required 450 GPUs running for 4 days (over 40,000 GPU-hours), highlighting the trade-off between human intuition and machine-driven design.</li>
+          <li><strong>State-of-the-Art Performance:</strong> NASNet achieved top-1 accuracy of 82.7% and top-5 accuracy of 96.2% on ImageNet, setting a new benchmark for automated architecture search.</li>
+          <li><strong>Scalability:</strong> The discovered cells could be stacked to create larger networks, demonstrating that the search process was not just a one-off success but a scalable methodology.</li>
+          <li><strong>Unintuitive Topologies:</strong> The resulting cell structures were highly complex and fragmented, making them difficult for humans to interpret or analyze, yet they achieved state-of-the-art performance.</li>
+          <li><strong>Real-World Applications:</strong> Automated industrial defect detection. A manufacturing company can let AutoML design a highly specialized network perfectly tuned to their specific factory camera data.</li>
         </ul>
       </section>
+        
 
       <hr className="border-gray-300" />
 

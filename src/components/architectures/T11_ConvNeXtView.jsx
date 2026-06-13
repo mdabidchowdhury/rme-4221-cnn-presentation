@@ -55,8 +55,14 @@ export default function T11_ConvNeXtView() {
           <li><strong>Beating Transformers:</strong> ConvNeXt achieved an astonishing 87.8% top-1 accuracy on ImageNet, directly competing with or outperforming state-of-the-art Vision Transformers like Swin-B.</li>
           <li><strong>Simplicity:</strong> It achieved this without requiring the complex, memory-hungry self-attention mechanisms, proving pure convolutions are still highly viable.</li>
           <li><strong>Robustness:</strong> Showed better performance than Transformers on dense prediction tasks like object detection and semantic segmentation.</li>
+          <li><strong>Transfer Learning:</strong> ConvNeXt's architecture proved to be highly transferable to downstream tasks, making it a strong candidate for real-world applications.</li>
+          <li><strong>Numerical Example:</strong> By expanding the kernel size from standard 3x3 to a massive 7x7 and applying Transformer techniques, ConvNeXt-Base achieved 83.8% accuracy, directly beating the Swin Transformer.</li>
+          <li><strong>Efficiency:</strong> Despite its large kernel size, ConvNeXt remains computationally efficient due to the use of depthwise convolutions, making it suitable for deployment in resource-constrained environments.</li>
+          <li><strong>Architectural Influence:</strong> ConvNeXt has influenced subsequent CNN designs, encouraging a reevaluation of convolutional architectures in the era of Transformers.</li>
+          <li><strong>Real-World Applications:</strong> Modern dense prediction tasks like autonomous vehicle semantic segmentation (identifying exactly which pixels are road, which are cars, and which are sky).</li>
         </ul>
       </section>
+        
 
       <hr className="border-gray-300" />
 

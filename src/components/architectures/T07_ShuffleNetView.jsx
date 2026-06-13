@@ -52,6 +52,8 @@ export default function T07_ShuffleNetView() {
           <li><strong>ARM Device Dominance:</strong> On ARM-based mobile devices, ShuffleNet achieved an actual inference speedup of up to 13x over AlexNet while maintaining comparable accuracy.</li>
           <li><strong>Outperforming Baselines:</strong> Under a strict computational budget of 40 MFLOPs, ShuffleNet outperformed MobileNetV1 by a significant 7.8% margin on ImageNet top-1 error.</li>
           <li><strong>Innovation in Routing:</strong> It proved that deterministic data-routing operations (like memory shuffling) could replace heavy mathematical operations for feature combination.</li>
+          <li><strong>Numerical Example:</strong> Under a strict hardware budget of 40 MFLOPs, ShuffleNet achieves a massive 7.8% lower Top-1 error on ImageNet compared to MobileNet V1.</li>
+          <li><strong>Real-World Applications:</strong> Always-on embedded vision sensors (like smart doorbell cameras or factory-line motion detectors) running on ultra-low-power ARM processors.</li>
         </ul>
       </section>
 
