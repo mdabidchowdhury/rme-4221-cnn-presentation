@@ -50,7 +50,7 @@ export default function T02_DenseNetView() {
           <li><strong>Parameter Efficiency:</strong> DenseNet-201 achieves similar ImageNet accuracy to ResNet-101 but requires roughly half the parameters (~20M vs ~45M).</li>
           <li><strong>Feature Propagation:</strong> The architecture naturally scales well to tasks requiring high-resolution details, influencing models in medical image segmentation and super-resolution.</li>
           <li><strong>Regularization:</strong> The dense connectivity provides an implicit "deep supervision" effect, making the network much easier to train and highly resistant to overfitting on smaller datasets.</li>
-          <li><strong>Numerical Example:</strong>DenseNet-201 achieves similar accuracy to ResNet-101 but uses only ~20 million parameters instead of ~45 million (a massive 55% reduction in size).</li>
+          <li><strong>Numerical Example:</strong> DenseNet-201 achieves similar accuracy to ResNet-101 but uses only ~20 million parameters instead of ~45 million (a massive 55% reduction in size).</li>
           <li><strong>Practical Applications:</strong> High-resolution medical image segmentation (like outlining the exact boundaries of a tumor). Because features are reused rather than compressed, fine-grained spatial details are preserved perfectly.</li>
         </ul>
       </section>
