@@ -22,7 +22,7 @@ export default function ResNetView() {
       <section>
         <h3 className="text-2xl font-bold text-blue-800 mb-3">2. Architecture Design</h3>
         <p className="text-gray-700 leading-relaxed mb-4">
-          The core innovation of ResNet is the <strong>Skip Connection</strong> (or shortcut connection). Instead of hoping each few stacked layers directly fit a desired underlying mapping $H(x)$, ResNet explicitly lets these layers fit a residual mapping $F(x) = H(x) - x$. The original mapping is recast into $F(x) + x$. This is realized by feedforward neural networks with "shortcut connections" that bypass one or more layers, performing identity mapping.
+          The core innovation of ResNet is the <strong>Skip Connection</strong> (or shortcut connection). Instead of hoping each few stacked layers directly fit a desired underlying mapping <i>H(x)</i>, ResNet explicitly lets these layers fit a residual mapping <i>F(x) = H(x) - x</i>. The original mapping is recast into <i>F(x) + x</i>. This is realized by feedforward neural networks with "shortcut connections" that bypass one or more layers, performing identity mapping.
         </p>
         
         <InteractiveBlock 
